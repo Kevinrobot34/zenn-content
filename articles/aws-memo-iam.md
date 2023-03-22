@@ -3,8 +3,10 @@ title: "AWS IAM 関係メモ"
 emoji: "🔐"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["AWS", "IAM",]
-published: false
+published: true
 ---
+
+AWS IAM 関連のメモ
 
 ## 認証と認可
 多くの場合認証と認可は同時に行われるが、本質的には全然違うものであるので、これを意識しておくと分かりやすくなる。
