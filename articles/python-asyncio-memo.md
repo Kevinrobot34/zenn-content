@@ -256,20 +256,24 @@ OpenAI APIは、自然言語、コード、または画像の理解や生成を�
 
 ## References
 
-* 公式
-    * asyncio : https://docs.python.org/ja/3/library/asyncio.html
-    * https://docs.python.org/ja/3/library/asyncio-eventloop.html
-* blog
-    * [Pythonの非同期通信（asyncioモジュール）入門を書きました]( https://iuk.hateblo.jp/entry/2017/01/27/173449 )
-    * [Qiita - Pythonの非同期プログラミングを完全理解]( https://qiita.com/kaitolucifer/items/3476158ba5bd8751e022 )
-        * 非同期処理について具体的なサンプルを交えて説明してくれてる
-        * asyncioの使い方がわかるわけじゃないが、何をやってるかを掴みやすい
-    * [Qiita - [Python] asyncioに入門してみたメモ]( https://qiita.com/everylittle/items/57da997d9e0507050085 )
-    * [asyncio 非同期IOの基本]( https://python.civic-apps.com/asyncio-basic/ )
-    * https://fastapi.tiangolo.com/async/
-        * fastapi の docs に並行処理とasync/awaitに関する話が載っているので参考になりそう
-* その他
-    * [Webサーバーアーキテクチャ進化論2023]( https://blog.ojisan.io/server-architecture-2023/ )
-    * [Qiita - Pythonのthreadingとmultiprocessingを完全理解]( https://qiita.com/kaitolucifer/items/e4ace07bd8e112388c75 )
-    * [Goでの並行処理を徹底解剖！ - 並行処理と並列処理]( https://zenn.dev/hsaki/books/golang-concurrency/viewer/term )
-        * Goに関する話ではあるが、並行処理と並列処理の話をかなり丁寧にかいてくれている
+## References
+
+### 公式ドキュメント
+
+https://docs.python.org/ja/3/library/asyncio.html
+https://docs.python.org/ja/3/library/asyncio-eventloop.html
+
+
+### blogs
+
+https://iuk.hateblo.jp/entry/2017/01/27/173449
+https://qiita.com/kaitolucifer/items/3476158ba5bd8751e022
+https://qiita.com/everylittle/items/57da997d9e0507050085
+https://python.civic-apps.com/asyncio-basic/
+
+### その他
+
+https://fastapi.tiangolo.com/async/
+https://blog.ojisan.io/server-architecture-2023/
+https://qiita.com/kaitolucifer/items/e4ace07bd8e112388c75
+https://zenn.dev/hsaki/books/golang-concurrency/viewer/term
