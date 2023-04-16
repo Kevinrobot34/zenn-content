@@ -94,7 +94,7 @@ I/O（入出力）の待ち時間に別の処理をやらせることで **並�
 ### 具体例1: time
 
 #### gatherを使って並行実行
-```sample1-1.py
+```python
 import asyncio
 import time
 
@@ -119,7 +119,7 @@ asyncio.run(main())
 ```
 
 #### 適当にやると同期処理と変わらん例１
-```sample1-2.py
+```python
 import asyncio
 import time
 
@@ -145,7 +145,7 @@ asyncio.run(main())
 
 
 #### 適当にやると同期処理と変わらん例２
-```sample1-3.py
+```python
 import asyncio
 import time
 
@@ -179,7 +179,7 @@ OpenAIのAPIなどはうらで大規模言語モデルが動いているのでAP
 
 以下の例では、openaiのドキュメントの文を日本語に翻訳するようにAPIを叩いているが、asyncioをうまく使うと並行処理により高速化されていることがわかる。
 
-```api_sample.py
+```python
 import asyncio
 import time
 
