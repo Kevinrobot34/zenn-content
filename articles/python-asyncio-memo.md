@@ -1,6 +1,6 @@
 ---
 title: "Pythonで非同期処理をやる"
-emoji: "🔐"
+emoji: "🚥"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Python", "非同期処理", "asyncio"]
 published: true
