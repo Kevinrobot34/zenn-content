@@ -462,7 +462,7 @@ https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/access_policies_managed-v
 ### resource based policy
 
 * [DevelopersIO - 特定の IAM ロールのみアクセスできる S3 バケットを実装する際に検討したあれこれ]( https://dev.classmethod.jp/articles/s3-bucket-acces-to-a-specific-role/ )
-
+* [DevelopersIO - IAMロールセッション名にユーザー名を強制できる条件 sts:RoleSessionName が使えるようになりました]( https://dev.classmethod.jp/articles/sts-sessionname/ )
 
 ### policy evaluation
 
@@ -600,7 +600,8 @@ https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
 * configファイルで各profileに記載することができるconfig変数
   * `role_arn` : assume role したい IAM role の arn
   * `mfa_serial` : assume role する際に利用するMFAデバイスのシリアル番号
-
+  * `role_session_name` : セッション名を指定できる
+    * [DevelopersIO - AWS CLIがAssumeRoleする際のセッション名を指定する]( https://dev.classmethod.jp/articles/aws-cli-assume-role-with-session-name/ )
 
 
 #### その他
