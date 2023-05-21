@@ -1,5 +1,10 @@
 # zenn-content
 
+## 記事を書く
+
+```bash
+$ npx zenn new:article --slug {slug} --title {title} --type tech
+```
 
 # References
 
