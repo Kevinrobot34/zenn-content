@@ -1,5 +1,5 @@
 ---
-title: ""
+title: "Snowflakeでの環境分離について考える"
 emoji: "❄️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake"]
