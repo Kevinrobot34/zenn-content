@@ -55,7 +55,8 @@ https://ja.wikipedia.org/wiki/Request_for_Comments
 
 RSA暗号は、巨大な自然数の素因数分解が一般に困難（高速にはできない）ことを利用した暗号技術。
 
-![](/images/articles/private-key-summary/rsa-encryption.png)
+<!-- markdown-link-check-disable-next-line --> 
+![rsa-explanation](/images/articles/private-key-summary/rsa-encryption.png)
 *[slideshare - RSA暗号運用でやってはいけない n のこと #ssmjp]( https://www.slideshare.net/sonickun/rsa-n-ssmjp ) より引用*
 
 
