@@ -3,7 +3,7 @@ title: "AWS IAM の複数のポリシー・条件の評価ロジック"
 emoji: "🧑‍⚖️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["AWS", "IAM"]
-published: false
+published: true
 ---
 
 ## はじめに
@@ -78,9 +78,9 @@ https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_condit
 
 そこで以下の通り3つのタグを用意して、 `aws:PrincipalTag/tag-key` で代わりに実験します。
 
-* `testVpcEndpoint`
-* `testVpc`
-* `testArn`
+* `aws:SourceVpce` の代わりに `aws:PrincipalTag/testVpcEndpoint`
+* `aws:SourceVpc` の代わりに `aws:PrincipalTag/testVpc`
+* `aws:PrincipalArn` の代わりに `aws:PrincipalTag/testArn`
 
 
 
@@ -90,42 +90,42 @@ https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_condit
 
 ```json
 {
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Principal" : "*",
-        "Action" : [
-          "s3:GetObject",
-          "s3:GetObjectVersion"
-        ],
-        "Effect" : "Deny",
-        "Resource" : "arn:aws:s3:::test-bucket/*",
-        "Condition" : {
-          "StringNotEquals" : {
-            "aws:PrincipalTag/testVpcEndpoint" : [ "vpce-123456780912" ],
-            "aws:PrincipalTag/testArn" : "arn:aws:iam::123456789012:role/test-role"
-          }
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Principal": "*",
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Effect": "Deny",
+            "Resource": "arn:aws:s3:::test-bucket/*",
+            "Condition": {
+                "StringNotEquals": {
+                    "aws:PrincipalTag/testVpcEndpoint": ["vpce-123456780912"],
+                    "aws:PrincipalTag/testArn": "arn:aws:iam::123456789012:role/test-role"
+                }
+            }
+        },
+        {
+            "Principal": "*",
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Effect": "Deny",
+            "Resource": "arn:aws:s3:::test-bucket/*",
+            "Condition": {
+                "StringNotEquals": {
+                    "aws:PrincipalTag/testVpc": ["vpc-12345678"]
+                },
+                "StringEquals": {
+                    "aws:PrincipalTag/testArn": "arn:aws:iam::123456789012:role/test-role"
+                }
+            }
         }
-      },
-      {
-        "Principal" : "*",
-        "Action" : [
-          "s3:GetObject",
-          "s3:GetObjectVersion"
-        ],
-        "Effect" : "Deny",
-        "Resource" : "arn:aws:s3:::test-bucket/*",
-        "Condition" : {
-          "StringNotEquals" : {
-            "aws:PrincipalTag/testVpc" : [ "vpc-12345678" ]
-          },
-          "StringEquals" : {
-            "aws:PrincipalTag/testArn" : "arn:aws:iam::123456789012:role/test-role"
-          }
-        }
-      },
     ]
-  }
+}
 ```
 
 ポイントとしては以下のように `StringNotEquals` に複数のキーがある場合です。
@@ -138,6 +138,23 @@ https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_condit
   "aws:PrincipalTag/testArn" : "arn:aws:iam::123456789012:role/test-role"
 }
 ```
+
+#### 実験結果
+
+各要素について指定された値がTagにセットされている場合を `o` と、そうでない場合を `x` として実験すると以下のようになります
+
+| testArn | testVpcEndpoint | testVpc | 結果 |
+|:---:|:---:|:---:|:---:|
+| o | o | o | Allowed |
+| o | o | x | Denied |
+| o | x | o | Allowed |
+| o | x | x | Denied |
+| x | o | o | Allowed |
+| x | o | x | Allowed |
+| x | x | o | Denied |
+| x | x | x | Denied |
+
+実際のネットワークの設定としてはこの８パターン全てあり得るとも限りませんが、ポリシーの書き方・演算子の使い方に問題ないかはこのようにTagを使うことで簡単に検証ができました。
 
 
 ## References
