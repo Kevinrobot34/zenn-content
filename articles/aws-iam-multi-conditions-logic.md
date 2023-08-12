@@ -2,7 +2,7 @@
 title: "AWS IAM の複数のポリシー・条件の評価ロジック"
 emoji: "🧑‍⚖️"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["AWS", "IAM"]
+topics: ["AWS", "IAM", "認可"]
 published: true
 ---
 
