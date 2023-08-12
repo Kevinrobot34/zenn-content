@@ -9,7 +9,7 @@ published: true
 ## はじめに
 
 AWS の IAM で最小権限の法則を実現しようとすると、 複数のポリシー・ステートメントを用意したり、その中で複数の条件を書いたりすることがあると思います。
-また、明示的にアクセス制限を実現するためにリソースベースポリシーに明示的な拒否を否定条件演算子と組み合わせたりすることがあると思います。
+また、明示的にアクセス制限を実現するためにリソースベースポリシーに明示的な拒否を[否定条件演算子]( https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_elements_condition_operators.html )と組み合わせたりすることがあると思います。
 
 シンプルな条件であればそれほど悩むことはありませんが、条件が複雑になってくると適切に Statement ブロックを分けたり Condition ブロックを記載する必要が出てきます。特に明示的な拒否と否定条件演算子を組み合わせていると、最終的に何が拒否されて何が拒否されないのか分かりにくくなりがちです。
 
@@ -70,7 +70,7 @@ https://dev.classmethod.jp/articles/s3-bucket-policy-multi-condition/
 
 ### タグを利用した簡易的な検証
 
-実際のポリシーでは `aws:sourceVpce` や `aws:PrincipalArn` などのコンテキストキーを利用してアクセス経路やアクセス主に応じた許可・拒否を実現したいという場合が多いと思いますが、 IAM policy の評価ロジック（明示的な拒否と否定条件演算子の組み合わせ方、など）を検証するためだけに実際にネットワークの設定を再現したりするのは大変だと思います。
+実際のポリシーでは `aws:sourceVpce` や `aws:PrincipalArn` などの[コンテキストキー]( https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_condition-keys.html )を利用してアクセス経路やアクセス主に応じた許可・拒否を実現したいという場合が多いと思いますが、 IAM policy の評価ロジック（明示的な拒否と否定条件演算子の組み合わせ方、など）を検証するためだけに実際にネットワークの設定を再現したりするのは大変だと思います。
 
 そこで個人的におすすめなのは以下のようにして検証する、というものです。
 
@@ -175,6 +175,8 @@ https://dev.classmethod.jp/articles/s3-bucket-policy-multi-condition/
 
 
 ## References
+
+https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_evaluation-logic.html
 
 https://dev.classmethod.jp/articles/devio-2021-iam-evaluation-logic/
 
