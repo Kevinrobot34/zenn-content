@@ -9,9 +9,9 @@ published: true
 ## はじめに
 
 AWS の IAM で最小権限の法則を実現しようとすると、 複数のポリシー・ステートメントを用意したり、その中で複数の条件を書いたりすることがあると思います。
-また、明示的にアクセス制限を実現するためにリソースベースポリシーに明示的な拒否を否定の条件演算子と組み合わせたりすることがあると思います。
+また、明示的にアクセス制限を実現するためにリソースベースポリシーに明示的な拒否を否定条件演算子と組み合わせたりすることがあると思います。
 
-シンプルな条件であればそれほど悩むことはありませんが、条件が複雑になってくると適切に Statement ブロックを分けたり Condition ブロックを記載する必要が出てくるわけです。特に明示的な拒否と否定条件演算子を組み合わせていると、最終的に何が許可されて何が拒否されるのかわかりにくくなりがちです。
+シンプルな条件であればそれほど悩むことはありませんが、条件が複雑になってくると適切に Statement ブロックを分けたり Condition ブロックを記載する必要が出てきます。特に明示的な拒否と否定条件演算子を組み合わせていると、最終的に何が拒否されて何が拒否されないのか分かりにくくなりがちです。
 
 そこで、本記事では IAM におけるポリシー・ステートメント・条件に関するロジックをまとめ、いくつかの具体例と共に紹介します。
 
@@ -34,7 +34,7 @@ https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/access_policies.html#acce
 
 ### 複数条件の評価
 
-以下の通り、Condition ブロックでは、演算子やキーについては AND で、キーに対する Value は OR で評価されます。
+以下の通り、Condition ブロックでは、演算子やキーについては `AND` で、キーに対する Value は `OR` で評価されます。
 
 > * If your policy statement has multiple condition operators, the condition operators are evaluated using a logical `AND``.
 > * If your policy statement has multiple context keys attached to a single condition operator, the context keys are evaluated using a logical `AND`.
@@ -45,10 +45,26 @@ https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/access_policies.html#acce
 > ![condition-block](/images/articles/aws-iam-multi-conditions-logic/condition-block.png) <!-- markdown-link-check-disable-line -->
 
 
-
 https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_condition-logic-multiple-context-keys-or-values.html
 
 
+重要なポイントとして、否定演算子であっても複数のキーや条件についてはあくまで `AND` で結ばれるということです
+例えば `StringNotEquals` に複数のキーが以下のように指定されている場合を考えると、
+「`keyA` が `valueA` でなく」**かつ**「`keyB` が `valueB` でない」場合に、このConditionブロックがあるステートメントは評価されることになります。
+
+```json
+"Condition": {
+  "StringNotEquals" : {
+    "keyA" : "valueA",
+    "keyB" : "valueB"
+  }
+}
+```
+
+このような条件が Deny のステートメントについていた場合は厄介ですが、ドモルガンの法則を思い出すと、「`keyA` が `valueA` である」**または**「`keyB` が `valueB` である」時には **拒否されない** となります。
+
+以下の DevelopersIO の記事で似た状況について詳しく説明されています。
+https://dev.classmethod.jp/articles/s3-bucket-policy-multi-condition/
 
 ## 具体的な検証
 
@@ -62,6 +78,7 @@ https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_condit
 * S3バケットなどのリソースを用意して、その resource based policy (S3の場合はバケットポリシー) を編集できるようにしておく
 * 2つのポリシーを適宜編集して検証する
   * Condition について調査したい場合には `aws:PrincipalTag/tag-key` を Condition に使い、ポリシーやタグを編集したりしながらアクセスが可能か、拒否されるかを調査する
+  * 編集するのをバケットポリシーだけにするために、用意したIAM RoleにはS3に関する権限をつけておく
 
 もちろん実際の環境を用意して検証するのが確実ですが、この方法を使えばタグを編集するだけで簡単に様々な条件下でのポリシーの検証をできると思います。
 
@@ -158,8 +175,6 @@ https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_condit
 
 
 ## References
-
-https://dev.classmethod.jp/articles/s3-bucket-policy-multi-condition/
 
 https://dev.classmethod.jp/articles/devio-2021-iam-evaluation-logic/
 
