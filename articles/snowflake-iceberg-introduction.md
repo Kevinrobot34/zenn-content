@@ -156,7 +156,7 @@ Snowflake Iceberg Table には Snowflake を Catalog に使うかどうかで大
 どちらもファイルはS3などの自前のクラウドストレージに置くことになりますが、WriteはSnowflakeをカタログに使わないとできません。
 またSnowflakeをカタログにした方がSnowflake platformの力をフルに使うことができるのでパフォーマンスも良いようです。
 
-![iceberg-performance](/images/articles/snowflake-iceberg-introduction/iceberg-performance.png)
+![iceberg-performance-comparison](/images/articles/snowflake-iceberg-introduction/iceberg-performance-comparison.png)
 *https://www.snowflake.com/blog/unifying-iceberg-tables/ より*
 
 
