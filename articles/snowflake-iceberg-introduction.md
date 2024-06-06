@@ -10,29 +10,26 @@ published: false
 ## はじめに
 
 こんにちは！ナウキャストのデータエンジニアのけびんです。
-Data Cloud Summit 2024 にて Iceberg Table が GA となること、また Polaris Catalog が発表されました。
-大々的に発表されたので気になっているものの、詳細を知らない方も多いのではないでしょうか？
+Data Cloud Summit 2024 にて Iceberg Table が GA となること、また Polaris Catalog が発表されました。大々的に発表されたので気になっているものの、詳細を知らない方も多いのではないでしょうか？
 
 https://x.com/Kevinrobot34/status/1798428619687223776
 
-自分もその一人だったので、改めて Apache Iceberg とは何かというところから調べてまとめてみようと思います。
-もし誤りなどあれば教えていただけますと幸いです。
+自分もその一人だったので、本記事では改めて Apache Iceberg とは何かというところからまとめていきます。もし誤りなどあれば教えていただけますと幸いです。
 
 
 ## Table Format とは
 
-Apache Iceberg とは大規模な分析データ向けの Open Table Format で、 Snowflake の Iceberg Table はこれを使用したテーブルということになります。
-Iceberg をふかぼる前にそもそも Table Format とは何でしょうか？
+Apache Iceberg とは大規模な分析データ向けの Open Table Format で、 Snowflake の Iceberg Table はこれを使用したテーブルということになります。Iceberg を深掘る前にそもそも Table Format とは何でしょうか？
 Table Format とはファイルを管理・編成そして追跡し、テーブルを構成する方法のことです。関連する用語と並べて見ることで分かりやすくなると思います。
 
-| Data Lake の関連要素 |                    具体例                    |
-| :------------------: | :------------------------------------------: |
-|    Compute Engine    |    Spark / Presto / Hive / Snowflake など    |
-|     Table Format     | **Iceberg** / Delta Table / Hive format など |
-|     File Format      |       CSV / Avro / Parquet / ORC など        |
-|    Object Storage    |      AWS S3 / GCS / Azure Storage など       |
+| Data Lakehouse の関連要素 |                    具体例                    |
+| :-----------------------: | :------------------------------------------: |
+|      Compute Engine       |    Spark / Presto / Hive / Snowflake など    |
+|       Table Format        | **Iceberg** / Delta Table / Hive format など |
+|        File Format        |       CSV / Avro / Parquet / ORC など        |
+|      Object Storage       |      AWS S3 / GCS / Azure Storage など       |
 
-Data Lake としてなんらかの Object Storage に適当な File Format でデータを配置するだけではテーブルとしては有効に機能させられません。
+Data Lakehouse としてなんらかの Object Storage に適当な File Format でデータを配置するだけではテーブルとしては有効に機能させられません。
 物理的な個々のファイルをどのように活用することでテーブルとして理解できるか、ここの方法が大事であり、これが Table Format です。
 物理的なデータの File Format と実際の構造化されたテーブルとの間に存在する抽象的なレイヤと考えることができます。
 
@@ -62,7 +59,8 @@ Iceberg もこのような Table Format の一つです。
 
 Hive Format などの既存の Table Format にはいくつか問題点がありました。
 
-* Partition 変えられない
+* Schema Evolution / Partition Evolution をサポートしていない
+  * 
 * ACID 特性がない
 * Time Travel できない
 * ...
@@ -78,11 +76,9 @@ Iceberg はどのようにデータを編成するのかをみてみましょう
 ![iceberg-metadata](/images/articles/snowflake-iceberg-introduction/iceberg-metadata.png)
 *https://iceberg.apache.org/spec/#overview より*
 
-（あの図を入れる）
-
 a persistent tree structure
 
-* layer
+* architecture layer
   * **Iceberg Catalog**
 * metadata layer
   * metadata file / snapshot
@@ -90,12 +86,19 @@ a persistent tree structure
   * manifest file
 * data layer
 
-## Iceberg Table
-
-
 
 ## Catalog について
 
+
+## Iceberg Table について
+
+
+![tables-iceberg-snowflake-as-catalog](/images/articles/snowflake-iceberg-introduction/tables-iceberg-snowflake-as-catalog.svg)
+*https://docs.snowflake.com/ja/user-guide/tables-iceberg#use-snowflake-as-the-iceberg-catalog より*
+
+
+![tables-iceberg-external-catalog](/images/articles/snowflake-iceberg-introduction/tables-iceberg-external-catalog.svg)
+*https://docs.snowflake.com/ja/user-guide/tables-iceberg#use-a-catalog-integration より*
 
 
 
@@ -119,4 +122,19 @@ https://www.snowflake.com/blog/introducing-polaris-catalog/?lang=ja
 ## まとめ
 
 
+
+## References
+
+### Snowflake blog
+
+https://www.snowflake.com/blog/unifying-iceberg-tables/
+
+https://www.snowflake.com/blog/build-open-data-lakehouse-iceberg-tables/
+
+https://www.snowflake.com/blog/introducing-polaris-catalog/?lang=ja
+
+### その他
+
+https://medium.com/expedia-group-tech/a-short-introduction-to-apache-iceberg-d34f628b6799
+https://medium.com/geekculture/open-table-formats-delta-iceberg-hudi-732f682ec0bb
 
