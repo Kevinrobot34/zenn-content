@@ -72,6 +72,8 @@ Hive Format などで知られていた問題に対処したり、クラウド�
 
 * architecture layer
   * **Iceberg Catalog**
+    * テーブルの生成・削除・リネームといった情報を管理する
+    * テーブルの対応する metadata file がどれかを追跡するのが一番重要な責務
 * metadata layer
   * metadata file
     * テーブルの状態を表し、スキーマやパーティションの情報を持つ
@@ -114,18 +116,25 @@ https://iceberg.apache.org/docs/latest/evolution/
 
 ### ACID 特性をサポート
 
-テーブルに変更が加えられると新しく metadata file が作られますが、これが古いものと atomic に交換されるようになっています。
+テーブルに変更が加えられるとスナップショットを撮るような形で新しく metadata file が作られます。この新しい metadata file が古いものと atomic に交換されるようになっていたり、ファイルの読み書きの分離性を保証する形で実装されています。こういった工夫により Iceberg を利用したテーブルは ACID 特性を持つことが可能になっています。より細かい部分については以下のブログを参照ください。
+
+https://medium.com/snowflake/how-apache-iceberg-enables-acid-compliance-for-data-lakes-9069ae783b60
 
 
 ### Time Travel
 
-data files や manifest files は immutable に管理されており、必要に応じて過去時点のデータを復元することも可能です。
+ACID特定の部分と同様、スナップショット方式でかつ data files や manifest files は immutable に管理されており、必要に応じて過去時点のデータを復元したりクエリすることも可能になっています。
 
 
-## Catalog について
+## Iceberg Catalog について
 
 
-## Iceberg Table について
+Iceberg Catalog の詳細については以下をご覧ください。
+https://iceberg.apache.org/concepts/catalog/
+
+
+
+## Snowflake Iceberg Table について
 
 
 ![tables-iceberg-snowflake-as-catalog](/images/articles/snowflake-iceberg-introduction/tables-iceberg-snowflake-as-catalog.png)
