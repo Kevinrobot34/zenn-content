@@ -93,11 +93,11 @@ a persistent tree structure
 ## Iceberg Table について
 
 
-![tables-iceberg-snowflake-as-catalog](/images/articles/snowflake-iceberg-introduction/tables-iceberg-snowflake-as-catalog.svg)
+![tables-iceberg-snowflake-as-catalog](/images/articles/snowflake-iceberg-introduction/tables-iceberg-snowflake-as-catalog.png)
 *https://docs.snowflake.com/ja/user-guide/tables-iceberg#use-snowflake-as-the-iceberg-catalog より*
 
 
-![tables-iceberg-external-catalog](/images/articles/snowflake-iceberg-introduction/tables-iceberg-external-catalog.svg)
+![tables-iceberg-external-catalog](/images/articles/snowflake-iceberg-introduction/tables-iceberg-external-catalog.png)
 *https://docs.snowflake.com/ja/user-guide/tables-iceberg#use-a-catalog-integration より*
 
 
