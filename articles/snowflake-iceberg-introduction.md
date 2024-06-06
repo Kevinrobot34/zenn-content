@@ -3,7 +3,7 @@ title: "Snowflake新機能： Iceberg Table と Polaris Catalog の仕組み"
 emoji: "❄️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "Iceberg", "Data Engineering"]
-published: false
+published: true
 ---
 
 
@@ -29,7 +29,7 @@ Table Format とはファイルを管理・編成そして追跡し、テーブ�
 |        File Format        |       CSV / Avro / Parquet / ORC など        |
 |      Object Storage       |      AWS S3 / GCS / Azure Storage など       |
 
-Data Lakehouse としてなんらかの Object Storage に適当な File Format でデータを配置するだけではテーブルとしては有効に機能させられません。物理的な個々のファイルをどのように活用することでテーブルとして理解できるか、ここの方法が大事であり、これが Table Format です。物理的なデータの File Format と実際の構造化されたテーブルとの間に存在する抽象的なレイヤと考えることができます。
+Data Lakehouse としてなんらかの Object Storage に適当な File Format でデータを配置するだけではテーブルとしては機能しません。物理的な個々のファイルをどのように利用することでテーブルとして理解できるか、ここの方法が大事であり、これが Table Format です。物理的なデータの File Format と実際の構造化されたテーブルとの間に存在する抽象的なレイヤと考えることができます。
 
 Iceberg は新しい Table Format の一つというわけです。
 
@@ -41,7 +41,7 @@ https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html
 
 ## Hive Format の構造
 
-Table Format の具体例として Hive Format を見てみましょう。 Amazon Athena などで利用したことがある人も多いのではないでしょうか？以下のサンプルのように Hive Format ではデータをディレクトリ構造で整理し、それぞれのパーティションに基づいて必要なファイルのみ読み込む Pruning ができるようになっているのがポイントです。S3などのストレージにデータを綺麗に配置することである種のインデックスを作成することができるわけです。
+Table Format の具体例として Hive Format を見てみましょう。 Amazon Athena などで利用したことがある人も多いのではないでしょうか？以下のサンプルのように Hive Format ではデータをディレクトリ構造で整理し、それぞれのパーティションに基づいて必要なファイルのみ読み込むように Pruning ができるようになっているのがポイントです。S3などのストレージにデータを綺麗に配置することである種のインデックスを作成することができるわけです。
 ```
 /hive/warehouse/sample_table
 ├── date=2024-01-01/
@@ -63,14 +63,14 @@ Hive Format の場合、一度テーブルを作る（ファイルを配置し�
 
 ## Iceberg の構造
 
-Hive Format などで知られていた問題に対処したり、クラウド全盛の時代に大規模なデータ分析に対処するために Iceberg は改めて設計されました。そんな Iceberg は具体的にどのようにデータを編成するのかをみてみましょう。
+Hive Format などで知られていた問題に対処したり、クラウド全盛の時代に大規模なデータ分析に対処するために Iceberg は改めて設計されました。そんな Iceberg は具体的にどのようにデータを編成するのかを見てみましょう。
 
 ![iceberg-metadata](/images/articles/snowflake-iceberg-introduction/iceberg-metadata.png)
 *https://iceberg.apache.org/spec/#overview より*
 
 3つのレイヤーから構成され、いくつかの種類のファイルが存在します。
 
-* architecture layer
+* first layer
   * **Iceberg Catalog**
     * テーブルの生成・削除・リネームといった情報を管理する
     * テーブルの対応する metadata file がどれかを追跡するのが一番重要な責務
@@ -102,7 +102,7 @@ https://iceberg.apache.org/concepts/catalog/
 
 ## Iceberg の特徴
 
-Iceberg のうまい構造により、様々なメリットが存在します。
+先ほど見た Iceberg の構造により、様々なメリットが存在します。
 
 ### in-place table evolution
 
@@ -168,7 +168,7 @@ Iceberg はオープンな Table Format で、 Compute Engine と組み合わせ
 
 相互運用性を高めベンダーロックインに伴う潜在的なリスクを軽減するためにも Snowflake は Polaris Catalog という名の Iceberg Catalog を発表しこれを近々オープンソースとすることも述べています。このようなオープンソースのカタログにより具体的には以下のようなメリットが生まれます。
 
-* 複数の Compute Engine やカタログのためにデータを移動・コピーしておく必要はなくなります。どこかのクラウドストレージ１箇所にデータを配置しておき、 Polaris Catalog を設定しておけば、どんな Compute Engine もこのカタログとストレージを参照して相互運用することが可能
+* 複数の Compute Engine やカタログのためにデータを移動・コピーしておく必要はなくなります。どこかのクラウドストレージ１箇所にデータを配置しておき、 Polaris Catalog をホストしておけば、どんな Compute Engine もこのカタログとストレージを参照して相互運用することが可能
 * Polaris Catalog は Snowflake managed なインフラでホストしたものを利用することも可能ですし、自分たちのインフラでセルフホストすることも可能
 
 ![polaris-diagram](/images/articles/snowflake-iceberg-introduction/polaris-diagram.jpg)
