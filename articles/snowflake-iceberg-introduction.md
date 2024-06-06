@@ -144,6 +144,8 @@ Snowflake Iceberg Table には Snowflake を Catalog に使うかどうかで大
 ![tables-iceberg-external-catalog](/images/articles/snowflake-iceberg-introduction/tables-iceberg-external-catalog.png)
 *https://docs.snowflake.com/ja/user-guide/tables-iceberg#use-a-catalog-integration より*
 
+外部カタログとしては AWS Glue などが設定可能です。
+
 これらを比較すると以下のような違いがあります。
 
 |            ポイント             | Snowflake catalog | iceberg catalog |
@@ -153,29 +155,31 @@ Snowflake Iceberg Table には Snowflake を Catalog に使うかどうかで大
 |          Write access           |         ⭕️         |        ❌        |
 | Full Snowflake platform support |         ⭕️         |        ❌        |
 
-どちらもファイルはS3などの自前のクラウドストレージに置くことになりますが、WriteはSnowflakeをカタログに使わないとできません。
-またSnowflakeをカタログにした方がSnowflake platformの力をフルに使うことができるのでパフォーマンスも良いようです。
+どちらもファイルはS3などの自前のクラウドストレージに置くことになりますが、WriteはSnowflakeをカタログに使わないとできません。またSnowflakeをカタログにした方がSnowflake platformの力をフルに使うことができるのでパフォーマンスも良いようです。
 
 ![iceberg-performance-comparison](/images/articles/snowflake-iceberg-introduction/iceberg-performance-comparison.png)
 *https://www.snowflake.com/blog/unifying-iceberg-tables/ より*
 
 
 
-
 ## Catalog の問題点と Polaris Catalog
 
+Iceberg はオープンな Table Format で、 Compute Engine と組み合わせて Data Lakehouse として機能するわけですが、オープンであるにもかかわらず、 Iceberg Catalog と Compute Engine との間で相互依存する多くの制約があるというのが現実になっていたようです。
 
-* Instead of moving and copying data for different engines and catalogs, you can interoperate many engines on a single copy of data from one place.
-* You can host it in Snowflake managed infrastructure or your infrastructure of choice.
+相互運用性を高めベンダーロックインに伴う潜在的なリスクを軽減するためにも Snowflake は Polaris Catalog という名の Iceberg Catalog を発表しこれを近々オープンソースとすることも述べています。このようなオープンソースのカタログにより具体的には以下のようなメリットが生まれます。
 
-https://www.snowflake.com/blog/introducing-polaris-catalog/?lang=ja
+* 複数の Compute Engine やカタログのためにデータを移動・コピーしておく必要はなくなります。どこかのクラウドストレージ１箇所にデータを配置しておき、 Polaris Catalog を設定しておけば、どんな Compute Engine もこのカタログとストレージを参照して相互運用することが可能
+* Polaris Catalog は Snowflake managed なインフラでホストしたものを利用することも可能ですし、自分たちのインフラでセルフホストすることも可能
+
+![polaris-diagram](/images/articles/snowflake-iceberg-introduction/polaris-diagram.jpg)
+*https://www.snowflake.com/blog/introducing-polaris-catalog/?lang=ja より*
 
 
 
 ## まとめ
 
-
-次のブログでは実際に Iceberg を検証してみようと思います！
+本ブログでは Table Format とは何か、 Iceberg はどのような仕組みでどのようなメリットがあるのか、そして Polaris Catalog についてみてきました。サミットでも様々なセッションがあったので、今後もっと盛り上がっていきそうな予感です！
+一部の機能はまだPreviewだったりこれからPreviewなものもあるので動向を見守っていきましょう！
 
 ## References
 
