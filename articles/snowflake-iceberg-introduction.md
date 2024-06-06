@@ -1,5 +1,5 @@
 ---
-title: "Snowflake新機能： Iceberg Table と Polaris Catalog"
+title: "Snowflake新機能： Iceberg Table と Polaris Catalog の仕組み"
 emoji: "❄️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "Iceberg", "Data Engineering"]
@@ -90,8 +90,14 @@ Hive Format などで知られていた問題に対処したり、クラウド�
 
 それぞれ見ていきましょう。まず大事なポイントは、データファイルの整理の仕方です。 Hive Format では適切にディレクトリ構造を作っていましたが、 Iceberg では個々のデータファイルをメタデータを記録したファイルたちを適宜利用して追跡します。
 
-またメタデータのファイルたちはツリー構造で永続化されております。これにより柔軟性が増しています。
+またメタデータのファイルたちはツリー構造で永続化されており、効率よくテーブルのスナップショットを管理できるようになっています。これにより後述の様々な特徴を実現しています。
 
+## Iceberg Catalog について
+
+Iceberg Catalog の一番重要な責務は、テーブルの対応する metadata file がどれかを追跡する（ metadata へのポインタを保持する）ことです。これによりコンピュートエンジンはテーブルの管理とロードが可能になります。また現在指しているポインタを atomic に切り替えることで様々な利点を保証します。
+
+Iceberg Catalog の詳細については以下をご覧ください。
+https://iceberg.apache.org/concepts/catalog/
 
 
 ## Iceberg の特徴
@@ -125,24 +131,34 @@ https://medium.com/snowflake/how-apache-iceberg-enables-acid-compliance-for-data
 
 ACID特定の部分と同様、スナップショット方式でかつ data files や manifest files は immutable に管理されており、必要に応じて過去時点のデータを復元したりクエリすることも可能になっています。
 
-
-## Iceberg Catalog について
-
-
-Iceberg Catalog の詳細については以下をご覧ください。
-https://iceberg.apache.org/concepts/catalog/
-
+これら以外にも様々な利点があるようです。最新のフォーマットなのでよく考えられていますね。
 
 
 ## Snowflake Iceberg Table について
 
+Snowflake Iceberg Table には Snowflake を Catalog に使うかどうかで大きく分けて以下の２種類に分かれます。
 
 ![tables-iceberg-snowflake-as-catalog](/images/articles/snowflake-iceberg-introduction/tables-iceberg-snowflake-as-catalog.png)
 *https://docs.snowflake.com/ja/user-guide/tables-iceberg#use-snowflake-as-the-iceberg-catalog より*
 
-
 ![tables-iceberg-external-catalog](/images/articles/snowflake-iceberg-introduction/tables-iceberg-external-catalog.png)
 *https://docs.snowflake.com/ja/user-guide/tables-iceberg#use-a-catalog-integration より*
+
+これらを比較すると以下のような違いがあります。
+
+|            ポイント             | Snowflake catalog | iceberg catalog |
+| :-----------------------------: | :---------------: | :-------------: |
+|             Storage             |   Cloud Storage   |  Cloud Storage  |
+|           Read access           |         ⭕️         |        ⭕️        |
+|          Write access           |         ⭕️         |        ❌        |
+| Full Snowflake platform support |         ⭕️         |        ❌        |
+
+どちらもファイルはS3などの自前のクラウドストレージに置くことになりますが、WriteはSnowflakeをカタログに使わないとできません。
+またSnowflakeをカタログにした方がSnowflake platformの力をフルに使うことができるのでパフォーマンスも良いようです。
+
+![iceberg-performance](/images/articles/snowflake-iceberg-introduction/iceberg-performance.png)
+*https://www.snowflake.com/blog/unifying-iceberg-tables/ より*
+
 
 
 
@@ -154,18 +170,12 @@ https://iceberg.apache.org/concepts/catalog/
 
 https://www.snowflake.com/blog/introducing-polaris-catalog/?lang=ja
 
-## 具体例
-
-### Iceberg Table を作ってみる
-
-
-
-### Time-Travel っぽい実例
 
 
 ## まとめ
 
 
+次のブログでは実際に Iceberg を検証してみようと思います！
 
 ## References
 
