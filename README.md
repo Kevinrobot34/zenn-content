@@ -1,5 +1,13 @@
 # zenn-content
 
+## 環境用意
+
+```
+$ nodenv install 18.12.1
+$ nodenv local 18.12.1
+$ npm install
+```
+
 ## 記事を書く
 
 ```bash
