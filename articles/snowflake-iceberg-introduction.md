@@ -29,13 +29,19 @@ Table Format とはファイルを管理・編成そして追跡し、テーブ�
 |        File Format        |       CSV / Avro / Parquet / ORC など        |
 |      Object Storage       |      AWS S3 / GCS / Azure Storage など       |
 
-Data Lakehouse としてなんらかの Object Storage に適当な File Format でデータを配置するだけではテーブルとしては有効に機能させられません。
-物理的な個々のファイルをどのように活用することでテーブルとして理解できるか、ここの方法が大事であり、これが Table Format です。
-物理的なデータの File Format と実際の構造化されたテーブルとの間に存在する抽象的なレイヤと考えることができます。
+Data Lakehouse としてなんらかの Object Storage に適当な File Format でデータを配置するだけではテーブルとしては有効に機能させられません。物理的な個々のファイルをどのように活用することでテーブルとして理解できるか、ここの方法が大事であり、これが Table Format です。物理的なデータの File Format と実際の構造化されたテーブルとの間に存在する抽象的なレイヤと考えることができます。
 
-Table Format の具体例として Hive Format を見てみましょう。 Amazon Athena などで利用したことがある人も多いのではないでしょうか？
-以下のサンプルのようにHive Format ではデータをディレクトリ構造で整理し、それぞれのパーティションに基づいて必要なファイルのみ読み込む Pruning ができるようになっているのがポイントです。
-こうすることで、データ上に一種のインデックスを作成することができるわけです。
+Iceberg は新しい Table Format の一つというわけです。
+
+:::message
+Data Lakehouse は Data Lake と Data Warehouse のいいとこ取りをしたような比較的新しいアーキテクチャです。以下の記事などが参考になります。
+https://www.databricks.com/blog/2020/01/30/what-is-a-data-lakehouse.html
+:::
+
+
+## Hive Format の構造
+
+Table Format の具体例として Hive Format を見てみましょう。 Amazon Athena などで利用したことがある人も多いのではないでしょうか？以下のサンプルのように Hive Format ではデータをディレクトリ構造で整理し、それぞれのパーティションに基づいて必要なファイルのみ読み込む Pruning ができるようになっているのがポイントです。S3などのストレージにデータを綺麗に配置することである種のインデックスを作成することができるわけです。
 ```
 /hive/warehouse/sample_table
 ├── date=2024-01-01/
@@ -52,39 +58,68 @@ Table Format の具体例として Hive Format を見てみましょう。 Amazo
 │       └── file6
 ...
 ```
-Iceberg もこのような Table Format の一つです。
+Hive Format の場合、一度テーブルを作る（ファイルを配置してしまう）とパーティションは変更できなかったり、ディレクトリ内のすべてのテーブルをリストする必要がありパフォーマンスに優れない、などといった問題がありました。
 
 
-## 既存の Table Format の問題点
+## Iceberg の構造
 
-Hive Format などの既存の Table Format にはいくつか問題点がありました。
-
-* Schema Evolution / Partition Evolution をサポートしていない
-  * 
-* ACID 特性がない
-* Time Travel できない
-* ...
-* ( https://iceberg.apache.org/spec/#goals の話)
-
-これらを解消すべくここ最近に作られた Open Table Format の一つが Iceberg というわけです。
-
-
-## Iceberg の詳細
-
-Iceberg はどのようにデータを編成するのかをみてみましょう。
+Hive Format などで知られていた問題に対処したり、クラウド全盛の時代に大規模なデータ分析に対処するために Iceberg は改めて設計されました。そんな Iceberg は具体的にどのようにデータを編成するのかをみてみましょう。
 
 ![iceberg-metadata](/images/articles/snowflake-iceberg-introduction/iceberg-metadata.png)
 *https://iceberg.apache.org/spec/#overview より*
 
-a persistent tree structure
+3つのレイヤーから構成され、いくつかの種類のファイルが存在します。
 
 * architecture layer
   * **Iceberg Catalog**
 * metadata layer
-  * metadata file / snapshot
-  * manifest list
-  * manifest file
+  * metadata file
+    * テーブルの状態を表し、スキーマやパーティションの情報を持つ
+    * スナップショットのような形でテーブルの設定・データに変更があると新しく作成される
+    * manifest のパスの情報も持つ
+  * manifest list / manifest file
+    * 紐づいている data file のパーティションデータやその様々なメトリック・統計情報など
+    * data file のパスの情報も持つ
+    * immutable な avro 形式のファイル
 * data layer
+  * data files
+    * 物理的なデータファイルで、Parquet/ORC/Avro のどれか
+    * immutable に管理される
+
+それぞれ見ていきましょう。まず大事なポイントは、データファイルの整理の仕方です。 Hive Format では適切にディレクトリ構造を作っていましたが、 Iceberg では個々のデータファイルをメタデータを記録したファイルたちを適宜利用して追跡します。
+
+またメタデータのファイルたちはツリー構造で永続化されております。これにより柔軟性が増しています。
+
+
+
+## Iceberg の特徴
+
+Iceberg のうまい構造により、様々なメリットが存在します。
+
+### in-place table evolution
+
+まずは in-place table evolution です。単に Schema Evolution や Partition Evolution などということもあります。
+Hive Format によるテーブルの時にはテーブルのスキーマやパーティションなどを変更するためには、新しいテーブルとしてデータを配置しなおしたりする必要がありましたが、 Iceberg を利用したテーブルの場合直接変更を加えることができます。
+
+テーブルの設定に何らかの変更を加えると、新しい metadata file が作られ、適宜 manifest も編成されます。つまり直接 data file に変更を加えるわけではないのでパフォーマンスも良いはずです。
+
+またたとえば複数の metadata や manifest をおいておくことも可能なため、後から partition を追加したり、データを絞り込む時に複数の種類の partition を利用することも可能です。
+
+![partition-spec-evolution](/images/articles/snowflake-iceberg-introduction/partition-spec-evolution.png)
+*https://iceberg.apache.org/docs/latest/evolution/#partition-evolution より*
+
+具体的にどのような進化がサポートされているかはこちらをご覧ください。
+https://iceberg.apache.org/docs/latest/evolution/
+
+
+### ACID 特性をサポート
+
+テーブルに変更が加えられると新しく metadata file が作られますが、これが古いものと atomic に交換されるようになっています。
+
+
+### Time Travel
+
+data files や manifest files は immutable に管理されており、必要に応じて過去時点のデータを復元することも可能です。
 
 
 ## Catalog について
