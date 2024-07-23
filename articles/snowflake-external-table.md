@@ -1,5 +1,5 @@
 ---
-title: "snowflake-external-table"
+title: "Snowflake 外部テーブルは便利だぞ"
 emoji: "❄️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "DataEngineering", "SQL", "dbt"]
@@ -23,19 +23,21 @@ Snowpipe を利用するのが王道パターンかと思いますが、僕は�
 AWS で Athena を利用したことがある方は、 Athena のテーブルを想像していただくと分かりやすいと思います。
 
 
+以下のようなポイントがあります。
+
 * 外部テーブルは読み取り専用
 * パフォーマンスについて
   * `CREATE EXTERNAL TABLE` については基本的に早い印象
-  * 外部テーブルに対するクエリはネイティブなテーブルに比べてパフォーマンスが悪い
+  * 外部テーブルに対するクエリはネイティブなテーブルに比べて基本的にパフォーマンスが悪い
     * S3などに毎回データを取りに行く必要があるため
-* `METADATA$FILENAME` の話
+* クローンはできない
+* `METADATA$FILENAME` という特殊なカラムがある
 * ファイルサイズの推奨事項
   * https://docs.snowflake.com/ja/user-guide/tables-external-intro#general-file-sizing-recommendations
   * 並列処理をいい感じにやるためにファイルサイズの推奨がある
-* パーティションの設定をしよう
-  * `METADATA$FILENAME` を利用することで柔軟かつ簡単に設定できる
-  * `METADATA$FILENAME` からパーティションを設定する際の Tips
-  * 自動 vs 手動
+* パーティションの設定が可能
+  * `METADATA$FILENAME` がここでも活躍します
+* dbt から外部テーブルを作成することも可能
 
 
 ## 外部テーブルを実際に使ってみる
