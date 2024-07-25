@@ -1,5 +1,5 @@
 ---
-title: "Snowflake 外部テーブルは便利だぞ"
+title: "Snowflake の外部テーブル入門"
 emoji: "❄️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "DataEngineering", "SQL", "dbt"]
@@ -9,11 +9,16 @@ published: false
 ## はじめに
 
 こんにちは！ナウキャストのデータエンジニアのけびんです。
+
+先日 Snowflake Unconference #2 に参加し、外部テーブルの話をしました。この記事はその際の資料として利用したものです。
+https://techplay.jp/event/949829
+
+---
+
 皆さん Snowflake へデータを取り込むときにどのような方法を使っているでしょうか？
 Snowpipe を利用するのが王道パターンかと思いますが、僕は外部テーブルを利用する方法が好きです。
 
-外部テーブルの存在は知っていても細かいところが意外と知られていないと感じることが多いので、
-本記事ではその辺りを紹介していこうと思います。
+外部テーブルの存在は知っていても細かいところが意外と知られていないと感じることが多いので、本記事ではその辺りを紹介していこうと思います。
 
 
 ## 外部テーブルとは
@@ -31,12 +36,11 @@ AWS で Athena を利用したことがある方は、 Athena のテーブルを
   * 外部テーブルに対するクエリはネイティブなテーブルに比べて基本的にパフォーマンスが悪い
     * S3などに毎回データを取りに行く必要があるため
 * クローンはできない
-* `METADATA$FILENAME` という特殊なカラムがある
+* `metadata$filename` という特殊なカラムがある
 * ファイルサイズの推奨事項
-  * https://docs.snowflake.com/ja/user-guide/tables-external-intro#general-file-sizing-recommendations
-  * 並列処理をいい感じにやるためにファイルサイズの推奨がある
+  * 並列処理をいい感じにやるために、Parquetであれば256~512MBのサイズのファイルにすることが推奨されている
 * パーティションの設定が可能
-  * `METADATA$FILENAME` がここでも活躍します
+  * `metadata$filename` がここでも活躍します
 * dbt から外部テーブルを作成することも可能
 
 
@@ -45,7 +49,7 @@ AWS で Athena を利用したことがある方は、 Athena のテーブルを
 ### サンプルデータの用意
 
 サクッと試すだけなので特に意味はないですが３つファイルを用意します。
-これらのファイルを `s3://<bucket-name>/db1/table1/*.csv` という場所に配置しておきます。
+これらのファイルを `s3://<bucket-name>/db1/table1/hoge.csv` という場所に配置しておきます。
 
 ```csv:data_20240701.csv
 col1,col2
@@ -100,6 +104,7 @@ https://speakerdeck.com/kevinrobot34/introduction-aws-iam-3a810adc-5172-4460-972
 
 ### 外部ステージの作成
 
+ファイルフォーマットと外部ステージも用意しておきましょう
 ```sql
 CREATE OR REPLACE FILE FORMAT my_csv_format
   TYPE = 'CSV'
@@ -128,8 +133,8 @@ https://docs.snowflake.com/en/user-guide/tables-external-intro#schema-on-read
 
 ```sql
 select 
-    METADATA$FILENAME, 
-    METADATA$FILE_ROW_NUMBER,
+    metadata$filename, 
+    metadata$file_row_number,
 from @my_s3_stage/
 order by 1, 2
 limit 100;
@@ -140,7 +145,7 @@ limit 100;
 
 今回の場合 `db1/table1/data_20240701.csv` のうちファイル名の `20240701` の部分を `YYYYMMDD` の日付のパーティションカラムとして使うようにしたいです。
 
-`split_part` などを使っていくことになりますが、これが結構面倒なので、以下のようなクエリを Worksheet でトライアンドエラーしながら綺麗にfilenameをパースできているかを確認するのがおすすめです。
+`split_part` や `substr` などを使い必要な部分を抽出すれば良いです。これが結構面倒なので、以下のようなクエリを Worksheet でトライアンドエラーしながら綺麗にfilenameをパースできているかを確認するのがおすすめです。
 
 ![stage_partition_try_and_error](/images/articles/snowflake-external-table/stage_partition_try_and_error.png)
 
@@ -216,7 +221,6 @@ sources:
             data_type: varchar(255)
             description: "Application ID"
           - ...
-
 ```
 * https://github.com/dbt-labs/dbt-external-tables/blob/main/sample_sources/snowflake.yml より参照
 
@@ -244,5 +248,6 @@ Snowflake へデータをロードするために外部テーブルを使うこ�
 
 ## まとめ
 
-本ブログでは Snowflake の外部テーブルについて紹介してきました。
+本ブログでは Snowflake の外部テーブルについて紹介してきました。Partition を使い dbt と組み合わせることで柔軟に管理・運用が可能です。
 
+S3に比較的綺麗にデータが揃っている場合などにはかなり有効なデータのロード方法だと思っています。機会があればぜひ使ってみてください！
