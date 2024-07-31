@@ -4,6 +4,7 @@ emoji: "❄️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "DataEngineering", "SQL", "dbt"]
 published: true
+publication_name: dataheroes
 ---
 
 ## はじめに
