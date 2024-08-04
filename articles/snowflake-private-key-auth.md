@@ -3,6 +3,7 @@ title: "Snowflakeで秘密鍵を環境変数に格納して認証する"
 emoji: "❄️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "認証", "dbt", "Terraform", "Security"]
+publication_name: dataheroes
 published: true
 ---
 
