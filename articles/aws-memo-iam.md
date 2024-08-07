@@ -8,6 +8,9 @@ published: true
 
 AWS IAM 関連のメモ
 
+以下の資料もぜひご覧ください。
+https://speakerdeck.com/kevinrobot34/introduction-aws-iam-3a810adc-5172-4460-9721-0041456eb2bf
+
 ## 認証と認可
 多くの場合認証と認可は同時に行われるが、本質的には全然違うものであるので、これを意識しておくと分かりやすくなる。
 
@@ -625,12 +628,12 @@ OpenID Connect(OIDC) を利用することで、Github ActionsでAWSのリソー
 
 IAMでは各リソースのIDのprefixがリソースごとに決まっている。
 
-| Prefix | Resource Type |
-| :---: | :---: |
-| AIDA | IAM user |
-| AROA | Role |
-| AKIA | Access Key |
-| ASIA | Temporary access key IDs |
+| Prefix |      Resource Type       |
+| :----: | :----------------------: |
+|  AIDA  |         IAM user         |
+|  AROA  |           Role           |
+|  AKIA  |        Access Key        |
+|  ASIA  | Temporary access key IDs |
 
 AccessKeyIDや、get-caller-identityをした際のUserIdなどはここのルールに従っているはず。
 
