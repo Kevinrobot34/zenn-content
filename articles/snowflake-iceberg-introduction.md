@@ -2,7 +2,7 @@
 title: "Snowflake新機能： Iceberg Table と Polaris Catalog の仕組み"
 emoji: "❄️"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Snowflake", "Iceberg", "Data Engineering"]
+topics: ["Snowflake", "Iceberg", "DataEngineering"]
 published: true
 publication_name: dataheroes
 ---
@@ -17,6 +17,13 @@ https://x.com/Kevinrobot34/status/1798428619687223776
 
 自分もその一人だったので、本記事では改めて Apache Iceberg とは何かというところからまとめていきます。もし誤りなどあれば教えていただけますと幸いです。
 
+:::message
+ぜひ [SnowVillage]( https://usergroups.snowflake.com/snowvillage/ ) の Slack に参加し、 #iceberg チャンネルを見てみてください！様々な情報を集めることができると思います。
+また現在 ["Apache Iceberg: The Definitive Guide"]( https://www.oreilly.com/library/view/apache-iceberg-the/9781098148614/ ) の輪読会も行っており、 #iceberg-the-definitive-guide チャンネルで毎週議論しながら読み進めています。こちらもぜひご参加いただければと思います。僕も発表しており資料は公開してますのでぜひご覧ください。
+
+* [1章後半 - Introduction to Apache Iceberg]( https://speakerdeck.com/kevinrobot34/apache-iceberg-the-definitive-guide-ch1 )
+* [4章前半 - Optimizing the Performance of Iceberg Tables]( https://speakerdeck.com/kevinrobot34/apache-iceberg-the-definitive-guide-ch4 )
+:::
 
 ## Table Format とは
 
