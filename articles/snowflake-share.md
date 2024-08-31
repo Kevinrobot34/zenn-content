@@ -49,7 +49,6 @@ Snowflake には様々な機能・特徴があり、以下のような絵で表�
 * Direct Sharing
   * Share を利用して直接 Consumer にデータを共有する方法
   * 昔からある方法だが、クロスリージョン・クラウドなアカウント同士だと共有できないなどの制限もある
-* Listing
 
 
 
@@ -197,11 +196,9 @@ Share の権限管理の方法には
 4. 3 で設定した Schema 内のオブジェクトの各種権限を付与する
    * テーブルやビューなど、オブジェクトに応じて権限を付与すればOK
    * オブジェクトや権限によって様々な注意があり、代表的なものは以下
-     * The SELECT privilege on views can only be granted on secure views. Attempting to grant the SELECT privilege on a non-secure view to a share returns an error.
-     * The USAGE privilege can only be granted on secure UDFs. Attempting to grant the USAGE privilege on a non-secure UDF to a share returns an error.
-     * Currently, sharing a UDF that references an object from another database is not supported. For example, if you attempt to grant USAGE on a UDF that references a secure view from another database, an error is returned.
+     * 基本的に view に対する select 権限は secure view にのみ可能で、 non-secure view に対して実行するとエラーになる
+     * 基本的に UDFs に対する usage 権限は secure UDFs にのみ可能で、 non-secure UDFs に対して実行するとエラーになる
      * Future grants はサポートされておらず、新しいオブジェクトに対しては都度権限を付与する必要がある
-     * You cannot reshare a database or database objects created from a share. If you attempt to grant the USAGE privilege on a database or database objects created from a share to a different share, an error is returned.
 
 
 Share への権限の付与については以下のドキュメントが詳しいです。特に "Usage notes" にはよくある落とし穴が記載されているのでぜひご覧ください。
