@@ -4,6 +4,7 @@ emoji: "🔑"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Security", "公開鍵暗号", "openssl", "rsa", "pem"]
 published: true
+publication_name: finatext
 ---
 
 

@@ -4,6 +4,7 @@ emoji: "🧵"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["AWS", "Quicksight", "Cognito", "ABAC"]
 published: true
+publication_name: finatext
 ---
 
 ## はじめに
