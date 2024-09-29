@@ -1,3 +1,12 @@
+---
+title: "Snowflake のキャッシュ"
+emoji: "♻️"
+type: "tech" # tech: 技術記事 / idea: アイデア
+topics: ["Snowflake", "DataEngineering", "SQL", "Cache"]
+published: false
+---
+
+
 ## はじめに
 
 こんにちは！ナウキャストのデータエンジニアのけびんです。
