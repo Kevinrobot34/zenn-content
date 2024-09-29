@@ -104,7 +104,7 @@ https://docs.snowflake.com/ja/user-guide/querying-persisted-results
   * などなど...
 * 利用されていることの確認方法
   * Query Profile にて以下のような "Query Result Reuse" と表示されていること
-    * **あとでここに画像を入れる**
+    * ![query-profile-qrc](/images/articles/snowflake-cache/query-profile-qrc.png =300x)
   * SELECT.dev を利用している場合には Warehouse ごとのパフォーマンスのページに Query Result Cache Usage Rate というグラフがあるのでそれを確認するのでもOK
 * 有効なユースケース
   * 24時間以内に完全に同一なクエリを繰り返し投げるようなワークロードの場合に Query Result Cache はかなり有効であることがわかります
