@@ -1,12 +1,3 @@
----
-title: "Snowflake のキャッシュ"
-emoji: "♻️"
-type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Snowflake", "DataEngineering", "SQL", "Cache"]
-published: false
----
-
-
 ## はじめに
 
 こんにちは！ナウキャストのデータエンジニアのけびんです。
@@ -30,7 +21,7 @@ SnowPro Core でも頻出の分野かと思うのでぜひ読んでいただけ�
 *https://medium.com/snowflake/snowflake-architecture-edition-pricing-overview-ed23f7b3dc6f より*
 
 
-“Multi-Cluster Shared Data Architecture”  と呼ばれる Snowflake のアーキテクチャは３つのレイヤーから構成されています。
+“**Multi-Cluster Shared Data Architecture**” と呼ばれる Snowflake のアーキテクチャは３つのレイヤーから構成されています。
 
 * Cloud Service Layer
   * Snowflake の論文では、システムの「頭脳」と称されている
@@ -52,7 +43,7 @@ SnowPro Core でも頻出の分野かと思うのでぜひ読んでいただけ�
 
 ## Snowflake におけるクエリ実行とコスト
 
-![snowflake-query-lifecycle](/images/articles/snowflake-cache/snowflake-query-lifecycle.png)
+![snowflake-query-lifecycle](/images/articles/snowflake-cache/snowflake-query-lifecycle.png =500x)
 *https://www.linkedin.com/pulse/query-lifecycle-snowflake-minzhen-yang-7mbfc/ より*
 
 Snowflake でクエリは以下の流れで実行されます。
@@ -104,7 +95,7 @@ https://docs.snowflake.com/ja/user-guide/querying-persisted-results
   * などなど...
 * 利用されていることの確認方法
   * Query Profile にて以下のような "Query Result Reuse" と表示されていること
-    * ![query-profile-qrc](/images/articles/snowflake-cache/query-profile-qrc.png =300x)
+    ![query-profile-qrc](/images/articles/snowflake-cache/query-profile-qrc.png =300x)
   * SELECT.dev を利用している場合には Warehouse ごとのパフォーマンスのページに Query Result Cache Usage Rate というグラフがあるのでそれを確認するのでもOK
 * 有効なユースケース
   * 24時間以内に完全に同一なクエリを繰り返し投げるようなワークロードの場合に Query Result Cache はかなり有効であることがわかります
@@ -139,7 +130,7 @@ https://www.snowflake.com/data-cloud-glossary/metadata/
       * 後述するように int 型では min/max の値を “Metadata Based Result” として Cloud Service Layer で取得し結果を返せるが、 varchar だと warehouse を動かして実際にデータを確認しないといけなかったりする
 * 利用されていることの確認方法
   * Query Profile にて以下のような "“Metadata Based Result" と表示されていること
-    * **あとでここに画像を入れる**
+    ![query-profile-mc](/images/articles/snowflake-cache/query-profile-mc.png =300x)
 * 有効なユースケース
   * Metadata cache は基本的に使える時にはSnowflakeがよしなに使ってくれるのであまり意識することはないが、上記のようにデータ型を変えればうまく Metadata Cache が使えるみたいなパターンがないかはユースケースに応じて考えてみると良いかもしれない。
 
@@ -166,7 +157,7 @@ https://docs.snowflake.com/ja/user-guide/performance-query-warehouse-cache
   * **あとでちゃんと書く**
 * 利用されていることの確認方法
   * Query Profile の Statistics で "Percentage scanned from cache" を見れば良い
-    * **あとでここに画像を入れる**
+    ![query-profile-wc](/images/articles/snowflake-cache/query-profile-wc.png =300x)
 * 有効なユースケース
   * 仕組みから分かる通り、 Warehouse 側にデータを一時的に保存する形になるので、 Warehouse が auto suspend されるとその度にこのキャッシュはドロップされてしまう。
   * つまり Warehouse を auto suspend せず起動したままにした方が Warehouse cache の観点では良いが、一方でその分 Warehouse 自体の課金は発生してしまう。コストの観点ではこのトレードオフに注意してユースケースごとに Warehouse の auto suspend の時間を調整することが重要になります。
