@@ -18,7 +18,9 @@ Snowflake はいろんなことをよしなにやってくれて、多くのユ�
 キャッシュの仕組みを理解するためにも Snowflake のアーキテクチャのおさらいもし、実際にキャッシュが利用される実例も紹介していきます！
 
 
-## Snowflake のアーキテクチャおさらい
+## Snowflake のアーキテクチャ
+
+まずは Snowflake 全体のアーキテクチャをおさらいしておきましょう。
 
 ![snowflake-architecture](/images/articles/snowflake-cache/snowflake-architecture.png)
 *https://medium.com/snowflake/snowflake-architecture-edition-pricing-overview-ed23f7b3dc6f より*
@@ -58,12 +60,12 @@ Snowflake のメインの時間的・金銭的コストがかかる処理は 4 �
 
 ## Snowflake の３つのキャッシュ
 
-キャッシュを利用することはパフォーマンス最適化・コスト最適化の一つの方法です。 Snowfalke では３種類のキャッシュが用意されており、それぞれ仕組みも対象としているデータも異なるのでそれぞれ見ていきましょう。
+キャッシュを利用することはパフォーマンス最適化・コスト最適化の一つの方法です。 Snowflake では３種類のキャッシュが用意されており、それぞれ仕組みも対象としているデータも異なるのでそれぞれ見ていきましょう。
 
 |          | Query Result Cache | Metadata Cache |     Warehouse Cache      |
 | :------: | :----------------: | :------------: | :----------------------: |
 |  レイヤ  |   Cloud Service    | Cloud Service  |         Compute          |
-|   対象   |    Query Result    |    Metadata    |      micropartition      |
+|   対象   |    Query Result    |    Metadata    |     micro partition      |
 | 有効期限 |       24時間       |     永続的     | Warehouse が動いている間 |
 
 
@@ -90,7 +92,7 @@ https://docs.snowflake.com/ja/user-guide/querying-persisted-results
 * 利用されていることの確認方法
   * Query Profile にて以下のような "**Query Result Reuse**" と表示されていること
     ![query-profile-qrc](/images/articles/snowflake-cache/query-profile-qrc.png =300x)
-  * SELECT.dev を利用している場合には Warehouse ごとのパフォーマンスのページに Query Result Cache Usage Rate というグラフがあるのでそれを確認するのでもOK
+  * [SELECT]( https://select.dev/ ) を利用している場合には Warehouse ごとのパフォーマンスのページに Query Result Cache Usage Rate というグラフがあるのでそれを確認するのでもOK
 
 Query Result Cache は上手に使うと効果が大きいですが、一方で上記の通り有効期限が短かったり、利用時の条件が意外といろいろとあります。これらを踏まえると、24時間以内に完全に同一なクエリを繰り返し投げるようなワークロードの場合に Query Result Cache はかなり有効であることがわかります。
 例えば Web アプリケーションのバックエンドとして Snowflake を利用しているような場合です。実装を工夫して Snowflake に投げるクエリはなるべく同一になるようにするのがポイントになります。
@@ -220,7 +222,7 @@ order by code;
 ２回実行した分の Query Profile を確認してみると、
 
 * 1回目は "Percentage scanned from cache" は 0% で、 Processing に一定時間がかかっている
-* 2回目は "Percentage scanned from cache" は 100% で、 TableScan に時間がほぼかかてtない
+* 2回目は "Percentage scanned from cache" は 100% で、 TableScan に時間がほぼかかっていない
 
 と、 Warehouse Cache が活用されることでパフォーマンスが上がっていることが確認できます。
 ![example-wc](/images/articles/snowflake-cache/example-wc.png)
@@ -282,7 +284,7 @@ Query Result Cache や Metadata Cache を利用したクエリは Warehouse を�
 ![query-details](/images/articles/snowflake-cache/query-details.png)
 
 
-また、 SELECT.dev を利用している場合には、 Warehouse のページからも確認できます。
+また、 [SELECT]( https://select.dev/ ) を利用している場合には、 Warehouse のページからも確認できます。
 具体的には Performance タブにて、 "Include Cloud Services Only" にチェックを入れて "Query Result Cache Usage Rate" を確認することで、 Query Result Cache の利用率を確認することもできます。
 
 ![example-select-dev](/images/articles/snowflake-cache/example-select-dev.png)
