@@ -162,7 +162,8 @@ https://docs.snowflake.com/ja/user-guide/performance-query-warehouse-cache
 * 対象：マイクロパーティション（テーブルデータまたはその一部）
 * 有効期限：Warehouseが起動している間
 * 利用時の条件
-  * **あとでちゃんと書く**
+  * 特になし
+    * あえて言うならLRUベースのキャッシュ管理なので、同一のデータが直近で利用されておりキャッシュに残っていること
 * 利用されていることの確認方法
   * Query Profile の Statistics で "**Percentage scanned from cache**" を見れば良い
     ![query-profile-wc](/images/articles/snowflake-cache/query-profile-wc.png =300x)
@@ -172,19 +173,6 @@ https://docs.snowflake.com/ja/user-guide/performance-query-warehouse-cache
 
 BI ツールなどから使っている Warehouse の場合、 Warehouse Cache が有効なことが多くこれを維持するために auto suspend を10分にすると良いとドキュメントでは推奨していたりします。
 
-Warehouse cache を考えるかどうかは、以下のようなクエリで [ACCOUNT_USAGE.QUERY_HISTORY]( https://docs.snowflake.com/ja/sql-reference/account-usage/query_history ) の “percentage_scanned_from_cache” を確認し、 auto suspend の時間を調整するのが大事になります。
-```sql
-SELECT warehouse_name
-  ,COUNT(*) AS query_count
-  ,SUM(bytes_scanned) AS bytes_scanned
-  ,SUM(bytes_scanned*percentage_scanned_from_cache) AS bytes_scanned_from_cache
-  ,SUM(bytes_scanned*percentage_scanned_from_cache) / SUM(bytes_scanned) AS percent_scanned_from_cache
-FROM snowflake.account_usage.query_history
-WHERE start_time >= dateadd(month,-1,current_timestamp())
-  AND bytes_scanned > 0
-GROUP BY 1
-ORDER BY 5;
-```
 
 
 ## Cache が使われていることを確認してみる
@@ -315,7 +303,7 @@ Query Result Cache や Metadata Cache を利用したクエリは Warehouse を�
 また、 SELECT.dev を利用している場合には、 Warehouse のページからも確認できます。
 具体的には Performance タブにて、 "Include Cloud Services Only" にチェックを入れて "Query Result Cache Usage Rate" を確認することで、 Query Result Cache の利用率を確認することもできます。
 
-![example-select-dev](/images/articles/snowflake-cache/example-select-dev.png.png)
+![example-select-dev](/images/articles/snowflake-cache/example-select-dev.png)
 
 
 ## 終わりに
