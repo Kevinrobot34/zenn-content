@@ -1,5 +1,5 @@
 ---
-title: "Snowflake のキャッシュ"
+title: "Snowflake の３種のキャッシュ徹底解説"
 emoji: "♻️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "DataEngineering", "SQL", "Cache"]
@@ -32,30 +32,25 @@ SnowPro Core でも頻出の分野かと思うのでぜひ読んでいただけ�
 
 “**Multi-Cluster Shared Data Architecture**” と呼ばれる Snowflake のアーキテクチャは３つのレイヤーから構成されています。
 
-* Cloud Service Layer
+* **Cloud Service Layer**
   * Snowflake の論文では、システムの「頭脳」と称されている
   * 認証・認可やセキュリティ、最適化までSnowflakeの様々なサービスが含まれる
   * FoundationDB という Key-Value Store があり、様々なメタデータが永続化されている
-* Compute Layer / Query Processing Layer
+* **Compute Layer / Query Processing Layer**
   * Snowflake の論文では、システムの「筋肉」と称されている
   * 要は Warehouse のところで、クエリ実行を司る
-  * Compute と Storage が分離されていて嬉しい
-    * 簡単に Warehouse を Scale up も Scale out もできる
-    * Warehouse は幾つでも作れる
-  * コストのメインはここ
-* Storage Layer / Database Storage Layer
+* **Storage Layer / Database Storage Layer**
   * S3などのオブジェクトストレージが利用されている
   * テーブルデータがマイクロパーティションとして列指向形式でよしなに保存されていたり、クエリの結果が保存されていたりする
   * Snowflake が全て管理しており、顧客は直接はアクセスできない
-  * 直接存在を意識することはあまりないが、 $25.00 / TB コストがかかること、パーティションやクラスタリングの構造がどうなっているか想像することはあるよね
 
 
 ## Snowflake におけるクエリ実行とコスト
 
+アーキテクチャと合わせてクエリ実行時の流れを把握しておくと、 Cache がどのように働いているのかが意識しやすいです。
+
 ![snowflake-query-lifecycle](/images/articles/snowflake-cache/snowflake-query-lifecycle.png =500x)
 *https://www.linkedin.com/pulse/query-lifecycle-snowflake-minzhen-yang-7mbfc/ より*
-
-Snowflake でクエリは以下の流れで実行されます。
 
 1. Query を Snowflake が受信する
 2. Query Result Cache を確認し、存在したら直ちに結果を返す
@@ -64,22 +59,18 @@ Snowflake でクエリは以下の流れで実行されます。
 5. 計算結果を返す
 
 
-Snowflake のメインの時間的・金銭的コストは 4 の Warehouse での実際の計算処理の部分であり、これを如何に減らせるかがパフォーマンス最適化・コスト最適化における重要なテーマになります。
+Snowflake のメインの時間的・金銭的コストがかかる処理は 4 の Warehouse で実際の計算する部分であり、これを如何に減らせるかがパフォーマンス最適化・コスト最適化における重要なテーマになります。
 
-キャッシュを利用することはパフォーマンス最適化・コスト最適化の一つの方法です。 Snowfalke では３種類のキャッシュが用意されており、それぞれ仕組みも対象としているデータも異なるのでそれぞれ見ていきましょう。
 
 ## Snowflake の３つのキャッシュ
 
-Snowflake には３種類のキャッシュが用意されていて、それぞれ動くレイヤや対象とするデータ、有効期限などが異なります。
+キャッシュを利用することはパフォーマンス最適化・コスト最適化の一つの方法です。 Snowfalke では３種類のキャッシュが用意されており、それぞれ仕組みも対象としているデータも異なるのでそれぞれ見ていきましょう。
 
 |          | Query Result Cache | Metadata Cache |     Warehouse Cache      |
 | :------: | :----------------: | :------------: | :----------------------: |
 |  レイヤ  |   Cloud Service    | Cloud Service  |         Compute          |
 |   対象   |    Query Result    |    Metadata    |      micropartition      |
 | 有効期限 |       24時間       |     永続的     | Warehouse が動いている間 |
-
-
-それぞれを詳細に見ていきましょう。
 
 
 ### Query Result Cache
