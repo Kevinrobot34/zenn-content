@@ -91,11 +91,11 @@ https://docs.snowflake.com/ja/user-guide/querying-persisted-results
 
 * レイヤ：Cloud Service
 * 対象：クエリの結果
-* 有効期限：24時間
+* 有効期限：**24時間**
 * 利用時の条件
   * パラメーター [`USE_CACHED_RESULT`]( https://docs.snowflake.com/ja/sql-reference/parameters#label-use-cached-result ) が `TRUE` となっていること
     * アカウント・ユーザー・セッションそれぞれで設定できるパラメーターなので注意
-  * クエリが以前実行されたものと基本的に完全一致すること
+  * **クエリが以前実行されたものと基本的に一致すること**
     * 大文字小文字の違いや table alias の利用といった構文の違いなど、計算結果がたとえ同じになるものであっても、クエリの文字列の違いがあるだけで Query Result Cache は利用できなくなる
     * ただし、空白の違いは無視してくれたりもする
   * クエリが参照しているテーブルが変更されていないこと
@@ -103,7 +103,7 @@ https://docs.snowflake.com/ja/user-guide/querying-persisted-results
   * 外部関数や Hybrid table がクエリに含まれていないこと
   * などなど...
 * 利用されていることの確認方法
-  * Query Profile にて以下のような "Query Result Reuse" と表示されていること
+  * Query Profile にて以下のような "**Query Result Reuse**" と表示されていること
     ![query-profile-qrc](/images/articles/snowflake-cache/query-profile-qrc.png =300x)
   * SELECT.dev を利用している場合には Warehouse ごとのパフォーマンスのページに Query Result Cache Usage Rate というグラフがあるのでそれを確認するのでもOK
 
@@ -131,14 +131,13 @@ https://www.snowflake.com/data-cloud-glossary/metadata/
 * 対象：様々なメタデータ
     * テーブルの行数
     * カラムの min / max といった統計情報
-    * ...
+    * などなど...
 * 有効期限：24時間
 * 利用時の条件
   * 収集されているメタデータのみで結果が得られるクエリであること
     * カラムの min/max といった統計情報については、対象とするカラムのデータ型によっても有無が変わったりする
-      * 後述するように int 型では min/max の値を “Metadata Based Result” として Cloud Service Layer で取得し結果を返せるが、 varchar だと warehouse を動かして実際にデータを確認しないといけなかったりする
 * 利用されていることの確認方法
-  * Query Profile にて以下のような "“Metadata Based Result" と表示されていること
+  * Query Profile にて以下のような "**Metadata Based Result**" と表示されていること
     ![query-profile-mc](/images/articles/snowflake-cache/query-profile-mc.png =300x)
 
 Metadata cache は基本的に使える時にはSnowflakeがよしなに使ってくれるのであまり意識することは少ないかもしれません。ただし上記の通り統計情報を取るだけっぽいものでもデータ型によって Metadata Cache が使えたり使えなかったりするので、実際に Query Profile で確認しながら Metadata Cache が使えないか模索するのも大事かもしれません。
@@ -165,7 +164,7 @@ https://docs.snowflake.com/ja/user-guide/performance-query-warehouse-cache
 * 利用時の条件
   * **あとでちゃんと書く**
 * 利用されていることの確認方法
-  * Query Profile の Statistics で "Percentage scanned from cache" を見れば良い
+  * Query Profile の Statistics で "**Percentage scanned from cache**" を見れば良い
     ![query-profile-wc](/images/articles/snowflake-cache/query-profile-wc.png =300x)
 
 仕組みから分かる通り、 Warehouse 側にデータを一時的に保存する形になるので、 Warehouse が auto suspend されるとその度にこのキャッシュはドロップされてしまいます。
@@ -191,6 +190,10 @@ ORDER BY 5;
 ## Cache が使われていることを確認してみる
 
 ここまでで Snowflake の３種類のキャッシュについて整理してきたので、ここからは実際にキャッシュが使われる場面を具体的に確認していきましょう！
+
+Snowsight で Query History みたり Details みたりしつつ、必要に応じて Profile に飛びながら詳細を確認するのがおすすめです。
+![snowsight-worksheet](/images/articles/snowflake-cache/snowsight-worksheet.png)
+
 
 ### データを用意する
 
@@ -279,18 +282,40 @@ Query Result Cache を確認するために `USE_CACHED_RESULT` を元に戻し�
 ```sql
 ALTER SESSION SET USE_CACHED_RESULT = TRUE;
 SHOW PARAMETERS like '%CACHE%';
++-------------------+-------+---------+---------+-----------------------------------------------------------------------------------------------------------------------------------------+---------+
+| key               | value | default | level   | description                                                                                                                             | type    |
+|-------------------+-------+---------+---------+-----------------------------------------------------------------------------------------------------------------------------------------+---------|
+| USE_CACHED_RESULT | true  | true    | SESSION | If enabled, query results can be reused between successive invocations of the same query as long as the original result has not expired | BOOLEAN |
++-------------------+-------+---------+---------+-----------------------------------------------------------------------------------------------------------------------------------------+---------+
 ```
 
 ### Query Result Cache の確認
 
-Query Profile が変わる事を示す。
-Query Details も変わる事を示す。
+最後に Query Result Cache が使われる様子を確認しましょう。
+Warehouse Cache を利用した時と同様のクエリを再度、２回連続で実行しましょう。
+```sql
+select code, count(*)
+from cache_test
+group by code
+order by code;
+```
+２回目に実行したクエリの Query Profile を確認すると、 "QUERY RESULT REUSE" だけとなっていることが分かります。
+
+![example-qrc](/images/articles/snowflake-cache/example-qrc.png)
 
 
 ### その他の Cloud Service Layer のクエリの確認方法
 
-* Query History をみると、 Warehouse の情報が記述されていない
-* SELECT.dev を契約している場合には "Query Result Cache Usage Rate" があるのでそれを見るのも Good
+Query Result Cache や Metadata Cache を利用したクエリは Warehouse を稼働させず Cloud Service Layer で結果を取得するため、以下のように Query Details を見た際に Warehouse の情報が記述されていない、という特徴があります。
+言い換えると、 Query History view などにも Warehouse は null 
+
+![query-details](/images/articles/snowflake-cache/query-details.png)
+
+
+また、 SELECT.dev を利用している場合には、 Warehouse のページからも確認できます。
+具体的には Performance タブにて、 "Include Cloud Services Only" にチェックを入れて "Query Result Cache Usage Rate" を確認することで、 Query Result Cache の利用率を確認することもできます。
+
+![example-select-dev](/images/articles/snowflake-cache/example-select-dev.png.png)
 
 
 ## 終わりに
