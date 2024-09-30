@@ -89,7 +89,7 @@ Query Result Cache は Cloud Service Layer でのキャッシュで、同一の�
 詳細はこちら。
 https://docs.snowflake.com/ja/user-guide/querying-persisted-results
 
-* レイヤ：Cloud Service
+* レイヤ：**Cloud Service**
 * 対象：クエリの結果
 * 有効期限：**24時間**
 * 利用時の条件
@@ -125,14 +125,13 @@ Cloud Service Layer では様々なメタデータを保存・更新しており
 
 Metadata Cache について言及されている公式の資料はあまり多くないですが、以下などがあります。
 https://www.snowflake.com/en/blog/how-foundationdb-powers-snowflake-metadata-forward/
-https://www.snowflake.com/data-cloud-glossary/metadata/
 
-* レイヤ：Cloud Service
+* レイヤ：**Cloud Service**
 * 対象：様々なメタデータ
     * テーブルの行数
     * カラムの min / max といった統計情報
     * などなど...
-* 有効期限：24時間
+* 有効期限：**なし（FoundationDBでメタデータは永続化されている）**
 * 利用時の条件
   * 収集されているメタデータのみで結果が得られるクエリであること
     * カラムの min/max といった統計情報については、対象とするカラムのデータ型によっても有無が変わったりする
@@ -147,9 +146,7 @@ Metadata cache は基本的に使える時にはSnowflakeがよしなに使っ�
 ### Warehouse Cache
 
 Data Cache とも呼ばれたりするやつです。
-
-Warehouse はクエリを実行する際に Storage layer にアクセスし必要なデータを取得することになります。
-Storage Layer にアクセスしにいく分のオーバーヘッドがあるので、このデータを Warehouse 内ででキャッシュしておき適宜再利用することでパフォーマンス向上を目指すのが Warehouse Cache です。
+Warehouse はクエリを実行する際に Storage layer にアクセスし必要なデータを取得することになります。Storage Layer にアクセスしにいく分のオーバーヘッドがあるので、このデータを Warehouse 内ででキャッシュしておき適宜再利用することでパフォーマンス向上を目指すのが Warehouse Cache です。
 
 キャッシュ管理のアルゴリズムは **LRU** (Least Recently Used) なシンプルなものです。新しいデータをキャッシュに追加する前には最も利用されていないデータを削除することで、よく使われるデータがキャッシュとして保存されるようになっています。
 この辺りは Snowflake の論文 “The Snowflake Elastic Data Warehouse” の “3.2.2 Local Caching and File Stealing” で述べられています。
@@ -158,9 +155,9 @@ Storage Layer にアクセスしにいく分のオーバーヘッドがあるの
 https://docs.snowflake.com/ja/user-guide/performance-query-warehouse-cache
 
 
-* レイヤ：Compute Layer
+* レイヤ：**Compute Layer**
 * 対象：マイクロパーティション（テーブルデータまたはその一部）
-* 有効期限：Warehouseが起動している間
+* 有効期限：**Warehouseが起動している間**
 * 利用時の条件
   * 特になし
     * あえて言うならLRUベースのキャッシュ管理なので、同一のデータが直近で利用されておりキャッシュに残っていること
@@ -258,7 +255,7 @@ select min(id), max(id), count(*) from cache_test;
 ```sql
 select min(code), max(code) from cache_test;
 ```
-![example-mc-2](/images/articles/snowflake-cache/example-mc-2.png)
+![example-mc-2](/images/articles/snowflake-cache/example-mc-2.png =500x)
 
 このようにデータ型によっても、取得されているメタデータや統計情報は異なるようです。
 この辺りについては詳細が述べられているドキュメントもあまりないようなので、随時 Query Profile を確認しながら、 Metadata Cache が使える形にクエリを変更したりテーブルを変更したりできないかを検討するのが良さそうです。
