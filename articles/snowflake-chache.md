@@ -106,11 +106,11 @@ https://docs.snowflake.com/ja/user-guide/querying-persisted-results
   * Query Profile にて以下のような "Query Result Reuse" と表示されていること
     ![query-profile-qrc](/images/articles/snowflake-cache/query-profile-qrc.png =300x)
   * SELECT.dev を利用している場合には Warehouse ごとのパフォーマンスのページに Query Result Cache Usage Rate というグラフがあるのでそれを確認するのでもOK
-* 有効なユースケース
-  * 24時間以内に完全に同一なクエリを繰り返し投げるようなワークロードの場合に Query Result Cache はかなり有効であることがわかります
-  * 例えば Web アプリケーションのバックエンドとして Snowflake を利用しているような場合です。ただし、基本的に同一なクエリでないと Query Result Cache は使えないので、これを踏まえた実装をする必要があります
-    * よくない例： `select * from target_table where some_id = ‘hoge’` と `hoge` の値が毎回違うクエリをサーバーから投げる
-    * 良い例：`select * from target_table` をSnowflakeに投げて、 some_idでの絞り込みはバックエンドサーバーで行う
+
+Query Result Cache は上手に使うと効果が大きいですが、一方で上記の通り有効期限が短かったり、利用時の条件が意外といろいろとあります。これらを踏まえると、24時間以内に完全に同一なクエリを繰り返し投げるようなワークロードの場合に Query Result Cache はかなり有効であることがわかります。
+例えば Web アプリケーションのバックエンドとして Snowflake を利用しているような場合です。実装を工夫して Snowflake に投げるクエリはなるべく同一になるようにするのがポイントになります。
+* よくない例： `select * from target_table where some_id = ‘hoge’` と `hoge` の値が毎回違うクエリをバックエンドサーバーから投げる
+* 良い例：`select * from target_table` をSnowflakeに投げて、 some_idでの絞り込みはバックエンドサーバーで行う
 
 
 :::message
@@ -121,7 +121,7 @@ Web アプリケーションのバックエンドでSnowflakeを使うのが最�
 
 ### Metadata Cache
 
-Cloud Service Layer では様々なメタデータを保存・更新しており、これらのデータを利用するだけですむクエリについては Warehouse を動かさずに結果を得ることができます。
+Cloud Service Layer では様々なメタデータを保存・更新しており、これらのデータを利用するだけですむクエリについては Warehouse を動かさずに結果を得ることができます。これらのメタデータは **FoundationDB** という Key-Value Store で永続化されています。
 
 Metadata Cache について言及されている公式の資料はあまり多くないですが、以下などがあります。
 https://www.snowflake.com/en/blog/how-foundationdb-powers-snowflake-metadata-forward/
@@ -140,8 +140,8 @@ https://www.snowflake.com/data-cloud-glossary/metadata/
 * 利用されていることの確認方法
   * Query Profile にて以下のような "“Metadata Based Result" と表示されていること
     ![query-profile-mc](/images/articles/snowflake-cache/query-profile-mc.png =300x)
-* 有効なユースケース
-  * Metadata cache は基本的に使える時にはSnowflakeがよしなに使ってくれるのであまり意識することはないが、上記のようにデータ型を変えればうまく Metadata Cache が使えるみたいなパターンがないかはユースケースに応じて考えてみると良いかもしれない。
+
+Metadata cache は基本的に使える時にはSnowflakeがよしなに使ってくれるのであまり意識することは少ないかもしれません。ただし上記の通り統計情報を取るだけっぽいものでもデータ型によって Metadata Cache が使えたり使えなかったりするので、実際に Query Profile で確認しながら Metadata Cache が使えないか模索するのも大事かもしれません。
 
 
 
@@ -152,7 +152,7 @@ Data Cache とも呼ばれたりするやつです。
 Warehouse はクエリを実行する際に Storage layer にアクセスし必要なデータを取得することになります。
 Storage Layer にアクセスしにいく分のオーバーヘッドがあるので、このデータを Warehouse 内ででキャッシュしておき適宜再利用することでパフォーマンス向上を目指すのが Warehouse Cache です。
 
-キャッシュ管理のアルゴリズムは LRU (Least Recently Used) なシンプルなもので、新しいデータをキャッシュに追加する前には最も利用されていないデータを削除することで、よく使われるデータがキャッシュとして保存されるようになっています。
+キャッシュ管理のアルゴリズムは **LRU** (Least Recently Used) なシンプルなものです。新しいデータをキャッシュに追加する前には最も利用されていないデータを削除することで、よく使われるデータがキャッシュとして保存されるようになっています。
 この辺りは Snowflake の論文 “The Snowflake Elastic Data Warehouse” の “3.2.2 Local Caching and File Stealing” で述べられています。
 
 その他の詳細はこちら。
@@ -167,12 +167,13 @@ https://docs.snowflake.com/ja/user-guide/performance-query-warehouse-cache
 * 利用されていることの確認方法
   * Query Profile の Statistics で "Percentage scanned from cache" を見れば良い
     ![query-profile-wc](/images/articles/snowflake-cache/query-profile-wc.png =300x)
-* 有効なユースケース
-  * 仕組みから分かる通り、 Warehouse 側にデータを一時的に保存する形になるので、 Warehouse が auto suspend されるとその度にこのキャッシュはドロップされてしまう。
-  * つまり Warehouse を auto suspend せず起動したままにした方が Warehouse cache の観点では良いが、一方でその分 Warehouse 自体の課金は発生してしまう。コストの観点ではこのトレードオフに注意してユースケースごとに Warehouse の auto suspend の時間を調整することが重要になります。
-  * BI ツールなどから使っている Warehouse の場合、このキャッシュを維持するために auto suspend を10分にすると良いとドキュメントでは推奨している
 
-Warehouse cache を考えるかどうかは、以下のようなクエリで ACCOUNT_USAGE.QUERY_HISTORY の “percentage_scanned_from_cache” を確認して見るのが大事。
+仕組みから分かる通り、 Warehouse 側にデータを一時的に保存する形になるので、 Warehouse が auto suspend されるとその度にこのキャッシュはドロップされてしまいます。
+つまり Warehouse を auto suspend せず起動したままにした方が Warehouse cache の観点では良いことになりますが、一方でその分 Warehouse 自体の課金は発生してしまいます。コストの観点ではこのトレードオフに注意してユースケースごとに Warehouse の auto suspend の時間を調整することが重要です。
+
+BI ツールなどから使っている Warehouse の場合、 Warehouse Cache が有効なことが多くこれを維持するために auto suspend を10分にすると良いとドキュメントでは推奨していたりします。
+
+Warehouse cache を考えるかどうかは、以下のようなクエリで [ACCOUNT_USAGE.QUERY_HISTORY]( https://docs.snowflake.com/ja/sql-reference/account-usage/query_history ) の “percentage_scanned_from_cache” を確認し、 auto suspend の時間を調整するのが大事になります。
 ```sql
 SELECT warehouse_name
   ,COUNT(*) AS query_count
@@ -188,6 +189,8 @@ ORDER BY 5;
 
 
 ## Cache が使われていることを確認してみる
+
+ここまでで Snowflake の３種類のキャッシュについて整理してきたので、ここからは実際にキャッシュが使われる場面を具体的に確認していきましょう！
 
 ### データを用意する
 
@@ -215,7 +218,7 @@ SHOW PARAMETERS like '%CACHE%';
 ```
 
 :::message
-Snowflake のパフォーマンス検証などの際に `USE_CACHED_RESULT` を False としたいことがあると思いますが、このような場合には `ALTER SESSION SET USE_CACHED_RESULT = FALSE;` とセッションレベルで Query Result Cache を無効化するようにしましょう。
+Snowflake のパフォーマンス検証などの際に `USE_CACHED_RESULT` を False としたいことがあると思いますが、このような場合には `ALTER SESSION SET USE_CACHED_RESULT = FALSE;` と**セッションレベル**で Query Result Cache を無効化するようにしましょう。
 筆者は慣れていなかった頃にアカウントレベルでを無効化してしまっていたようで、それに気づかずにしばらくの間 Query Result Cache を意図せず使えていなかったということがありました。。。
 :::
 
@@ -232,11 +235,43 @@ SHOW PARAMETERS like '%CACHE%';
 
 ### Warehouse Cache の確認
 
-**Percentage scanned from cache が0→100%となるのをみせる**
+まずは Warehouse Cache が使われる様子を確認しましょう。
+どんなクエリでも良いのですが、例えば以下のクエリを２回連続で実行してみましょう。
+```sql
+select code, count(*)
+from cache_test
+group by code
+order by code;
+```
+
+２回実行した分の Query Profile を確認してみると、
+
+* 1回目は "Percentage scanned from cache" は 0% で、 Processing に一定時間がかかっている
+* 2回目は "Percentage scanned from cache" は 100% で、 TableScan に時間がほぼかかてtない
+
+と、 Warehouse Cache が活用されることでパフォーマンスが上がっていることが確認できます。
+![example-wc](/images/articles/snowflake-cache/example-wc.png)
+
 
 ### Metadata Cache の確認
 
-**int / varchar でキャッシュが使われたりそうでなかったりする例を出す。**
+次に Metadata Cache が使われている様子も確認しましょう。
+
+試しに、 Int 型の `id` 列の最小値・最大値、そしてテーブルの行数を確認するクエリを実行してみると、 Query Profile は "METADATA-BASED RESULT" だけとなり、 Metadata Cache が使われていることがわかります。
+```sql
+select min(id), max(id), count(*) from cache_test;
+```
+![example-mc-1](/images/articles/snowflake-cache/example-mc-1.png)
+
+しかし、 Varchar 型の `code` 列の最小値・最大値を取得するクエリを実行してみると、以下の通り集計のクエリが Warehouse で普通に実行されることがわかります。
+```sql
+select min(code), max(code) from cache_test;
+```
+![example-mc-2](/images/articles/snowflake-cache/example-mc-2.png)
+
+このようにデータ型によっても、取得されているメタデータや統計情報は異なるようです。
+この辺りについては詳細が述べられているドキュメントもあまりないようなので、随時 Query Profile を確認しながら、 Metadata Cache が使える形にクエリを変更したりテーブルを変更したりできないかを検討するのが良さそうです。
+
 
 ### `USE_CACHED_RESULT` をオンに戻す
 
@@ -250,6 +285,12 @@ SHOW PARAMETERS like '%CACHE%';
 
 Query Profile が変わる事を示す。
 Query Details も変わる事を示す。
+
+
+### その他の Cloud Service Layer のクエリの確認方法
+
+* Query History をみると、 Warehouse の情報が記述されていない
+* SELECT.dev を契約している場合には "Query Result Cache Usage Rate" があるのでそれを見るのも Good
 
 
 ## 終わりに
