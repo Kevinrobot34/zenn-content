@@ -3,7 +3,8 @@ title: "Snowflake の３種のキャッシュ徹底解説"
 emoji: "♻️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "DataEngineering", "SQL", "Cache"]
-published: false
+published: true
+publication_name: finatext
 ---
 
 
@@ -15,13 +16,6 @@ Snowflake はいろんなことをよしなにやってくれて、多くのユ�
 
 今回の記事では最適化の際に大事な要素の一つであるキャッシュについて解説します。
 キャッシュの仕組みを理解するためにも Snowflake のアーキテクチャのおさらいもし、実際にキャッシュが利用される実例も紹介していきます！
-
-SnowPro Core でも頻出の分野かと思うのでぜひ読んでいただけたら嬉しいです！
-
-紹介すること
-* Snowflake のアーキテクチャのおさらい
-* Snowflake の３つのキャッシュについて
-* キャッシュが実際に使われる場面を確認する
 
 
 ## Snowflake のアーキテクチャおさらい
@@ -298,6 +292,8 @@ Query Result Cache や Metadata Cache を利用したクエリは Warehouse を�
 
 Snowflake の Cache には３種類あり、それぞれの特徴を見てきました。
 Snowflake のアーキテクチャを踏まえそれぞれの役割があり非常に興味深いですよね。
+
+SnowPro Core でも頻出な分野なので抑えておきたいところですね！
 
 基本的にはどの Cache も使える時にはよしなに使ってくれているため、普段はあまり意識しないかもしれないですが、
 しっかり Cache を使って最適化を進めようと思うと、裏側の仕組みをイメージできることが大事だなと改めて思いました！
