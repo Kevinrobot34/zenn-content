@@ -1,5 +1,5 @@
 ---
-title: "Apache Iceberg: The Definitive Guid 輪読会 10章 Apache Iceberg in Production"
+title: "Apache Iceberg: The Definitive Guid 10章 Apache Iceberg in Production"
 emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Iceberg", "DataEngienering", "OTF", "Snowflake"]
