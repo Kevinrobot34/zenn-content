@@ -80,8 +80,7 @@ https://iceberg.apache.org/docs/latest/spark-queries/#inspecting-tables
 ## Branching and Tagging
 
 ソフトウェア開発においてコードを Git でバージョン管理し、 branch や tag を利用した運用を行うというのは現在当たり前になっています。
-同様の方法でテーブルを管理することも有用だと考えられています。
-Iceberg ではテーブルの Snapshot が Git でいう commit のような役割を果たしており、テーブルに対する branch や tag の作成がサポートされています。
+同様の方法でデータを管理することも有用だと考えられています。Iceberg ではテーブルの Snapshot が Git でいう commit のような役割を果たしており、テーブルに対する branch や tag の作成がサポートされています。
 
 branch を作ってテーブルに対する複数の作業を並行して行ったり、あるブランチでの開発が完了し各種データの検証などもパスしてから本番環境のブランチにマージする、といったことが可能になります。また tag として snapshot に名前をつけ、その snapshot にアクセスしやすくしたり保護したりすることもできます。
 
@@ -150,39 +149,56 @@ CALL catalog_name.system.fast_forward('prod.db.table', 'main', 'audit-branch');
 
 ### Catalog-level branching and tagging
 
-Nessie をカタログとして使うとカタログレベルでの branching や tagging が可能になります。
+Table-level での branch や tag の作成は任意のカタログでサポートされていますが、
+Nessie カタログを利用すると Catalog レベルでの branch や tag の作成が可能になります。
 
+Nessie をカタログでは、データレイク全体を一つのエンティティとして取り扱い、複数テーブルに跨った変更を追跡することが可能です。
+
+基本的なメリットは table-level と変わりませんが、大規模なカタログの場合、個々のテーブルでバージョン管理するよりもカタログレベルで管理した方が多数のテーブルを同時に処理できるためデータ管理プロセスが大幅に簡素化されるでしょう。
 
 
 
 ## Multi-table Transactions
 
-Mulititable Transaction は「consistency」と「isolatioon」を実現するために重要。
+Multi-table Transaction は複数テーブルにまたがる操作の "consistency" と "isolatioon" を実現するために重要です。
 
-Multitable transaction では、複数の操作（これは複数のテーブルにまたがる場合もある）が一つのアトミックな作業の単位として扱われる。これはつまりこれらの複数の操作が成功するか、もしくはいずれかが失敗した場合には全ての変更がロールバックされ元に戻るということを意味する。
+Multitable transaction では、複数の操作（これは複数のテーブルにまたがる場合もある）が一つのアトミックな作業の単位として扱われます。これはつまりこれらの複数の操作が成功するか、もしくはいずれかが失敗した場合には全ての変更がロールバックされ元に戻るということを意味します。
 
 
 ### Consistency
 
-Multitable transaction はデータの整合性を維持するために非常に重要で、DBMSの重要な側面の一つ。
-具体例を考えると分かりやすい。
-例えばサプライチェーン管理システムがあり注文を管理する `Order` テーブルと、在庫を管理する `Inventory` テーブルがあるとする。注文があると `Order` が更新されると共に、 `Inventory` の該当する在庫のレコードは減らされる。
-もしこの２つの操作が一つのトランザクションとして取り扱われなかった場合、 `Order` は更新されるが、 `Inventory` だけロールバックされ在庫の減少がデータベースに反映されない、みたいなことが起こり得る。
-逆に、２つの操作が一つのトランザクションとして取り扱われると、 `Order` の更新は成功して `Inventory` の更新は失敗した場合、`Inventroy`も`Order`もどちらもロールバックされて元の状態に戻る。こうしてデータの整合性は保たれる。
+Multi-table transaction はデータの整合性を維持するために非常に重要で、DBMSの重要な側面の一つです。
+
+具体例を考えましょう。
+例えばサプライチェーン管理システムがあり注文を管理する `Order` テーブルと、在庫を管理する `Inventory` テーブルがあるとする。注文があると `Order` が更新されると共に、 `Inventory` の該当する在庫のレコードは減らされます。
+もしこの２つの操作が一つのトランザクションとして取り扱われなかった場合、 `Order` は更新されるが、 `Inventory` だけロールバックされ在庫の減少がデータベースに反映されない、みたいなことが起こり得ます。
+逆に、２つの操作が一つのトランザクションとして取り扱われると、 `Order` の更新は成功して `Inventory` の更新は失敗した場合、`Inventroy`も`Order`もどちらもロールバックされて元の状態に戻る。こうしてデータの整合性は保たれるわけです。
+
+このように複数テーブルにまたがった consistency を維持するためには Multi-table transaction は重要な役割を果たします。
 
 
 ### Isolation
 
 同時に複数のトランザクションが実行された際にお互いに干渉しない、という性質。
+それぞれのトランザクションはお互いのことを認識せず、 dirty read や data corruption といったことは起きないことが保証されます。
+
+この辺りは基本的に Single-table Transaction でも話は一緒なので、そちらの事例なども参考になるかもしれません。
+https://medium.com/@tglawless/apache-iceberg-acid-transactions-ec9d7b7afff5
 
 
 ### 現状
 
-Apache Icebrg としてはまだ開発中っぽい。
-
+10章で触れられているものの、2024年10月末現在、 Apache Icebrg としてはまだ Multi-table Transaction は開発中です。関連資料は以下。
 
 * [apache/iceberg: Add Multi-Table Transaction API #10617]( https://github.com/apache/iceberg/issues/10617 )
 * [DesignDocs - Multi-Table Transactions in Iceberg]( https://docs.google.com/document/d/1UxXifU8iqP_byaW4E2RuKZx1nobxmAvc5urVcWas1B8/edit?tab=t.0 )
+
+
+カタログが Multi-table transaction を制御するような構成が提案されているようです。
+
+:::message
+今までの他の章・節でも見てきたように、 Iceberg を運用する際にはカタログがいろんな面で重要な役割を果たすことが分かります。
+:::
 
 
 
