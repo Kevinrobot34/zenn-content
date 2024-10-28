@@ -207,11 +207,10 @@ https://medium.com/@tglawless/apache-iceberg-acid-transactions-ec9d7b7afff5
 
 ### Rolling Back at the Table Level
 
-Rollback は undo ボタンのようなもので、テーブルが望ましく無い状態になってしまった時にテーブルを望ましい元の状態に戻すための機能。
-Reactive に対応するために重要な機能の一つ。
+Rollback は undo ボタンのようなもので、テーブルが望ましく無い状態になってしまった時にテーブルを望ましい元の状態に戻すための機能です。Reactive に対応するために重要になります。
 
-Apache Iceberg ではテーブルの状態を変更するために以下の４つの Spark Procedure を用意している。
-ロールバックするスナップショットの指定の仕方がいろいろあるという感じ。最初に紹介した metadata tables は、どのスナップショットにロールバックすべきかを調査するために非常な有用なツールとなる。
+Apache Iceberg ではテーブルの状態を変更するために以下の４つの Spark Procedure を用意されています。
+ロールバックするスナップショットの指定の仕方がいろいろあるという感じです。最初に紹介した metadata tables は、どのスナップショットにロールバックすべきかを調査するために非常な有用なツールとなるので、適宜組み合わせながら使いましょう。
 
 * [`rollback_to_snapshot`]( https://iceberg.apache.org/docs/1.5.1/spark-procedures/#rollback_to_snapshot )
     * snapshot ID を指定してロールバックするプロシージャー
@@ -235,7 +234,7 @@ Apache Iceberg ではテーブルの状態を変更するために以下の４�
         * データファイルは作成されない
 
 
-これらのプロシージャを適切に利用することで、Icebergで管理しているデータを Git Like に管理することが可能になる。
+これらのプロシージャを適切に利用することで、Icebergで管理しているデータを Git Like に管理することが可能になります。
 
 
 進んだ注意
@@ -253,6 +252,10 @@ GitHub のようなバージョンコントロールシステムを利用する�
 しかし Nessie を利用している場合にはカタログレベルでロールバックすれば全てのテーブルを瞬時に以前の状態に戻すことができる。
 
 このようにワークロードが複雑で複数のテーブルを取り扱っているような場合にはカタログレベルでのロールバックが有効な Nessie は便利かも。
+
+:::message
+Nessie は Catalog-level の branching / tagging も Rollback も対応しており、規模が大きいユースケースにマッチすることが多そうな予感です。
+:::
 
 
 ## まとめ
