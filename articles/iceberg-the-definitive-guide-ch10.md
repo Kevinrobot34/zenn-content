@@ -3,7 +3,7 @@ title: "Apache Iceberg: The Definitive Guid 10章 Apache Iceberg in Production"
 emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Iceberg", "DataEngienering", "OTF", "Snowflake"]
-published: false
+published: true
 publication_name: dataheroes
 ---
 
@@ -162,7 +162,7 @@ Nessie をカタログでは、データレイク全体を一つのエンティ�
 
 Multi-table Transaction は複数テーブルにまたがる操作の "consistency" と "isolatioon" を実現するために重要です。
 
-Multitable transaction では、複数の操作（これは複数のテーブルにまたがる場合もある）が一つのアトミックな作業の単位として扱われます。これはつまりこれらの複数の操作が成功するか、もしくはいずれかが失敗した場合には全ての変更がロールバックされ元に戻るということを意味します。
+Multi-table transaction では、複数の操作（これは複数のテーブルにまたがる場合もある）が一つのアトミックな作業の単位として扱われます。これはつまりこれらの複数の操作が成功するか、もしくはいずれかが失敗した場合には全ての変更がロールバックされ元に戻るということを意味します。
 
 
 ### Consistency
@@ -205,11 +205,11 @@ https://medium.com/@tglawless/apache-iceberg-acid-transactions-ec9d7b7afff5
 ## Rollback
 
 
-### Rolling Back at the Table Level
-
 Rollback は undo ボタンのようなもので、テーブルが望ましく無い状態になってしまった時にテーブルを望ましい元の状態に戻すための機能です。Reactive に対応するために重要になります。
 
-Apache Iceberg ではテーブルの状態を変更するために以下の４つの Spark Procedure を用意されています。
+### Rolling Back at the Table Level
+
+Apache Iceberg ではあるテーブルの状態を切り戻すために以下の４つの Spark Procedure を用意されています。
 ロールバックするスナップショットの指定の仕方がいろいろあるという感じです。最初に紹介した metadata tables は、どのスナップショットにロールバックすべきかを調査するために非常な有用なツールとなるので、適宜組み合わせながら使いましょう。
 
 * [`rollback_to_snapshot`]( https://iceberg.apache.org/docs/1.5.1/spark-procedures/#rollback_to_snapshot )
@@ -224,11 +224,11 @@ Apache Iceberg ではテーブルの状態を変更するために以下の４�
     * 疑問：では結局何が変わっているの？
         * 実装は [`RollbackToSnapshotProcedure`]( https://github.com/apache/iceberg/blob/2b55fef7cc2a249d864ac26d85a4923313d96a59/spark/v3.5/spark/src/main/java/org/apache/iceberg/spark/procedures/RollbackToSnapshotProcedure.java#L42 ) らしいけど分からん
         * 予想としては metadata file の `current-snapshot-id` が更新されて、  `snapshot-log` も適宜更新される、というもの
-* `rollback_to_timestamp`
+* [`rollback_to_timestamp`]( https://iceberg.apache.org/docs/1.5.1/spark-procedures/#rollback_to_timestamp )
     * `rollback_to_snapshot` と基本的に同じだが、 snapshot ID ではなくタイムスタンプでロールバック先を指定する
-* `set_current_snapshot`
+* [`set_current_snapshot`]( https://iceberg.apache.org/docs/1.5.1/spark-procedures/#set_current_snapshot )
     * `rollback_to_snapshot` に近いが、このプロシージャの場合には、現在のテーブルの状態の先祖の snapshot である必要はなく、別のブランチやタグにある利用可能な任意の snapshot を設定することが可能
-* `cherrypick_snapshot`
+* [`cherrypick_snapshot`]( https://iceberg.apache.org/docs/1.5.1/spark-procedures/#cherrypick_snapshot )
     * まさに Git の cherry-pick のような処理を行うためのもの
     * メタデータのみの操作であり、別のスナップショットからの変更を組み込んだ新しいスナップショットを生成する
         * データファイルは作成されない
@@ -236,22 +236,23 @@ Apache Iceberg ではテーブルの状態を変更するために以下の４�
 
 これらのプロシージャを適切に利用することで、Icebergで管理しているデータを Git Like に管理することが可能になります。
 
-
+:::message alert
 進んだ注意
 * これらの rollback 処理は、キャッシュされた全ての Spark プランを無効にし、後続の操作がテーブルの更新された状態を利用するようにする
 * これらのプロシージャを利用するためには、テーブルに対するこれらの操作を実行する権限を持っている必要がある
+:::
 
 
 ### Rolling Back at the Catalog Level
 
-Nessie を Apache Iceberg のカタログとして利用することの利点の一つは、カタログレベルでのロールバックが可能になること。
+Nessie を Apache Iceberg のカタログとして利用することの利点の一つは、カタログレベルでのロールバックが可能になります。
 
-GitHub のようなバージョンコントロールシステムを利用することでソフトウェアエンジニアがコードベース全体を以前のバージョンに戻せるように、Nessie はデータエンジニアらがデータベース全体を以前の環境に戻すことを可能にする。
+GitHub のようなバージョンコントロールシステムを利用することでソフトウェアエンジニアがコードベース全体を以前のバージョンに戻せるように、Nessie はデータエンジニアらがデータベース全体を以前の環境に戻すことを可能にします。。
 
-あるバッチ処理を実行し様々なテーブルに変更を加えた後、その処理に誤りがあったことに気付いた場合を考える。 Iceberg はテーブルレベルのロールバックをサポートしているので、テーブルを一つずつロールバックすることで元の状態を復元することができる。
-しかし Nessie を利用している場合にはカタログレベルでロールバックすれば全てのテーブルを瞬時に以前の状態に戻すことができる。
+具体例として、あるバッチ処理を実行し様々なテーブルに変更を加えた後、その処理に誤りがあったことに気付いた場合を考えましょう。
+Iceberg はテーブルレベルのロールバックをサポートしているので、テーブルを一つずつロールバックすることで元の状態を復元することができます。しかし Nessie を利用している場合にはカタログレベルでロールバックすれば全てのテーブルを瞬時に以前の状態に戻すことが可能です。
 
-このようにワークロードが複雑で複数のテーブルを取り扱っているような場合にはカタログレベルでのロールバックが有効な Nessie は便利かも。
+このようにワークロードが複雑で複数のテーブルを取り扱っているような場合にはカタログレベルでのロールバックが有効な Nessie は便利でしょう。
 
 :::message
 Nessie は Catalog-level の branching / tagging も Rollback も対応しており、規模が大きいユースケースにマッチすることが多そうな予感です。
@@ -261,9 +262,9 @@ Nessie は Catalog-level の branching / tagging も Rollback も対応してお
 ## まとめ
 
 
-* Apache Iceberg の "metadata tables " / "branching and tagging" / "multitable transaction" / "rollback" の４つの機能はどれも Iceberg を本番運用する上で重要な役割を果たすことをみてきた
-    * metadata table は Iceberg で管理されたテーブルに関する様々な情報を提供し、 reactive / proactive なアプローチ両方において非常に重要となる
-    * branching and tagging を適切に利用することで本番環境を破壊することなく変更を検証する環境を提供するという proactive な管理が強化される
-    * multitable transaction を利用することで consistency が保たれる
-    * rollback の機能は障害発生時に簡単に回復する手段を提供しており、 reactive な対応が強化される
+* Apache Iceberg の "Metadata Tables " / "Branching and Tagging" / "Multi-table Transaction" / "Rollback" の４つの機能はどれも Iceberg を本番運用する上で重要な役割を果たすことをみてきた
+    * Metadata Table は Iceberg で管理されたテーブルに関する様々な情報を提供し、 reactive / proactive なアプローチ両方において非常に重要となる
+    * Branching and Tagging を適切に利用することで本番環境を破壊することなく変更を検証する環境を提供するという proactive な管理が強化される
+    * Multi-table Transaction を利用することで複数テーブルにまたがる処理の consistency / isolation が実現可能になる予定
+    * Rollback の機能は障害発生時に簡単に回復する手段を提供しており、 reactive な対応が強化される
 * 次の章では Streaming data の取り扱いについて見ていく
