@@ -4,9 +4,13 @@ emoji: "🧑‍⚖️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["AWS", "IAM", "認可"]
 published: true
+publication_name: finatext
 ---
 
+
 ## はじめに
+
+こんにちは！ナウキャストのデータエンジニアのけびんです。
 
 AWS の IAM で最小権限の法則を実現しようとすると、 複数のポリシー・ステートメントを用意したり、その中で複数の条件を書いたりすることがあると思います。
 また、明示的にアクセス制限を実現するためにリソースベースポリシーに明示的な拒否を[否定条件演算子]( https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_elements_condition_operators.html )と組み合わせたりすることがあると思います。
@@ -160,16 +164,16 @@ https://dev.classmethod.jp/articles/s3-bucket-policy-multi-condition/
 
 各要素について指定された値がTagにセットされている場合を `o` と、そうでない場合を `x` として実験すると以下のようになります
 
-| testArn | testVpcEndpoint | testVpc | 結果 |
-|:---:|:---:|:---:|:---:|
-| o | o | o | Allowed |
-| o | o | x | Denied |
-| o | x | o | Allowed |
-| o | x | x | Denied |
-| x | o | o | Allowed |
-| x | o | x | Allowed |
-| x | x | o | Denied |
-| x | x | x | Denied |
+| testArn | testVpcEndpoint | testVpc |  結果   |
+| :-----: | :-------------: | :-----: | :-----: |
+|    o    |        o        |    o    | Allowed |
+|    o    |        o        |    x    | Denied  |
+|    o    |        x        |    o    | Allowed |
+|    o    |        x        |    x    | Denied  |
+|    x    |        o        |    o    | Allowed |
+|    x    |        o        |    x    | Allowed |
+|    x    |        x        |    o    | Denied  |
+|    x    |        x        |    x    | Denied  |
 
 実際のネットワークの設定としてはこの８パターン全てあり得るとも限りませんが、ポリシーの書き方・演算子の使い方に問題ないかはこのようにTagを使うことで簡単に検証ができました。
 
