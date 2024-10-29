@@ -239,18 +239,18 @@ from table(generator(rowcount => 1000000));
 ```sql
 select min(id), max(id), count(*) from cache_test;
 ```
-![example-mc-1](/images/articles/snowflake-cache/example-mc-1.png)
+![example-mc-1](/images/articles/snowflake-cache/example-mc-1.png =500x)
 
 しかし、 Varchar 型の `code` 列の最小値・最大値を取得するクエリを実行してみると、以下の通り集計のクエリが Warehouse で普通に実行されていることがわかります。
 ```sql
 select min(code), max(code) from cache_test;
 ```
-![example-mc-2](/images/articles/snowflake-cache/example-mc-2.png =500x)
+![example-mc-2](/images/articles/snowflake-cache/example-mc-2.png =400x)
 
 
 このように統計情報から計算できそうなクエリでも、データ型によって挙動が変わるのです。
 
-同様な検証を行うと NUMBER, BOOLEAN, DATE, TIME および各 TIMESTAMP 型ではメタデータを利用し結果を得られますが、 VARCHAR, BINARY, FLOAT型ではメタデータを利用できず集計処理が走ってしまうことがわかります。
+同様な検証を行うと **NUMBER, BOOLEAN, DATE, TIME および各 TIMESTAMP 型**ではメタデータを利用し結果を得られますが、 **VARCHAR, BINARY, FLOAT型**ではメタデータを利用できず集計処理が走ってしまうことがわかります。
 
 日付を表すカラムでは VARCHAR 型ではなく DATE 型を利用しておくことで、最適化がされる可能性が増えるわけです。またそもそも DATE 型に特化した演算なども使いやすくなるため、あえて VARCHAR で保持しておく理由もあまりないでしょう。
 
@@ -290,6 +290,7 @@ group by data_date;
 
 ## まとめ
 
+改めてまとめです。 Partition Pruning はいつでも効くわけではないため、 Query Profile などで状況を確認しながら Snowflake の性能を最大限引き出せるようにしていきましょう💪
 
 * クエリコンパイルは Cloud Service Layer で行われる
 * Partition Pruning はクエリコンパイルの中で実行される
