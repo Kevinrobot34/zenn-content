@@ -22,7 +22,8 @@ Snowflake での select のクエリを最適化するためには「不要な�
 * クエリコンパイルは Cloud Service Layer で行われる
 * Partition Pruning はクエリコンパイルの中で実行される
 * 一般にサブクエリは計算しないと結果が分からないため、サブクエリによる絞り込みは Partiton Pruning と相性が悪い
-* サブクエリを使った条件であっても Metadata Cache を利用できるものであればその結果はコンパイル時に分かるため、 Partition Pruning が可能
+* サブクエリを使わないようにクエリを分割し変数などを使うと Pruning が効くようになる
+* またサブクエリを使った条件であっても Metadata Cache を利用できるものであれば Partition Pruning が可能
 
 
 ## dbt incremental model とサブクエリ
@@ -296,7 +297,7 @@ group by data_date;
 * Partition Pruning はクエリコンパイルの中で実行される
     * そのため Compile 時にフィルター条件が確定しないと Partition Pruning は実行できない
 * 一般にサブクエリは計算しないと結果が分からないため、サブクエリを利用したフィルター条件を利用していると Partiton Pruning は実行できない
-    * サブクエリの結果を変数に代入する形でクエリを分割し、フィルター条件ではその変数を参照する形にすると Pruning が効くようになる
+* サブクエリの結果を変数に代入する形でクエリを分割し、フィルター条件ではその変数を参照する形にすると Pruning が効くようになる
 * サブクエリを使った条件であっても Metadata Cache を利用できるようなサブクエリであればその結果はコンパイル時に分かるため、 Pruning は効く
     * Min/Maxを取るようなシンプルなクエリであってもデータ型によって Metadata Cache を利用できるかは変わる
     * 特に Varchar の場合 Metadata Cache が使えないため、日付を表す文字列は date 型で保存しておくのがおすすめ
