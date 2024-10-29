@@ -117,7 +117,7 @@ group by data_date;
 * 左側 Step1: サブクエリ `(select max(data_date) from pos_sample_1)` の部分
 * 右側 Step2: 集計のクエリ
     * `Filter [2]` のノードは以下の通り step1 の結果でフィルターする感じになっています
-      ![sample-query-1-filter-node](/images/articles/snowflake-subquery-and-pruning/sample-query-1-filter-node.png =400px)
+      ![sample-query-1-filter-node](/images/articles/snowflake-subquery-and-pruning/sample-query-1-filter-node.png =500x)
 
 この Profile を見ると、パフォーマンス的に問題になるのは以下の二点です。
 
@@ -182,7 +182,7 @@ group by data_date;
 
 このようにすることで、クエリコンパイル時に pruning する条件が分かるようになるため、partition pruning が効くことになります。実際に Profile で以下の通り確認できます。
 
-![sample-query-2](/images/articles/snowflake-subquery-and-pruning/sample-query-2.png)
+![sample-query-2](/images/articles/snowflake-subquery-and-pruning/sample-query-2.png =400x)
 
 
 
@@ -284,7 +284,8 @@ group by data_date;
 ```
 するとprofileは以下のようになっており、サブクエリを使っていても Pruning が効いていることが分かります。
 
-<img title='Screenshot 2024-10-26 at 10.10.20.png' alt='Screenshot 2024-10-26 at 10.10.20' src='/attachments/fb871526-d438-4f75-9333-28b5a00f9903' width="400" data-meta='{"width":1126,"height":1090}'>
+![sample-query-3](/images/articles/snowflake-subquery-and-pruning/sample-query-3.png =400x)
+
 
 
 ## まとめ
