@@ -3,7 +3,7 @@ title: "Snowflakeでサブクエリ利用時にプルーニングが効かない
 emoji: "❄️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "dbt", "DataEngineering"]
-published: false
+published: true
 publication_name: finatext
 ---
 
@@ -69,9 +69,7 @@ where data_date > (select max(data_date) from {{ this }} )
 | 2020-01-01 |    28    | 3308066933530881735 |
 |    ...     |   ...    |         ...         |
 
-ある日付にある店舗でいくら売れたか、という簡単なトランザクションデータです。
-
-このテーブルから、最新の日付の総売上を取得したい場合、こんな感じのクエリを書きたくなります。
+ある日付にある店舗でいくら売れたか、という簡単なトランザクションデータです。このテーブルから、最新の日付の総売上を取得したい場合、以下のようなクエリを書くことになるでしょう。
 
 ```sql
 select 
@@ -84,7 +82,7 @@ group by data_date;
 
 dbt incremental model とは厳密には違いますが、「サブクエリでフィルタリングする」という点で構造は同じです。
 
-このクエリは気持ち的には最新の日付が含まれる partition のみ読み込めば良いはずなので、 pruning が効いてほしいですよね。しかし実際には細かい条件によって pruning が効いたり効かなかったりします。
+このクエリは最新の日付が含まれる partition のみ読み込めば良いはずなので、 partition pruning が効いてほしいですよね。しかし実際には細かい条件によって pruning が効いたり効かなかったりします。
 
 
 ### pruning が効かない状況を再現
@@ -123,11 +121,11 @@ group by data_date;
 この Profile を見ると、パフォーマンス的に問題になるのは以下の二点です。
 
 * Step2 において partition pruning が効いていない
-    * 64/64 全ての parittion がスキャンされていることがわかります
-    * 今回のテストテーブルは小さいですが、大きいテーブルだとここで時間がかかることになります
+  * 64/64 全ての parittion がスキャンされていることがわかります
+  * 今回のテストテーブルは小さいですが、大きいテーブルだとここで時間がかかることになります
 * Step1 において集計処理がされていること
-    * よく「Snowflakeではパーティションごとに最小値・最大値などのメタデータ・統計情報を収集している」と言いますが、テーブルの `data_date` の最大値を求めるというのはまさにこのメタデータを利用できそうです
-     * しかし実際には集計の計算が動いてしまっています
+  * よく「Snowflakeではパーティションごとに最小値・最大値などのメタデータ・統計情報を収集している」と言いますが、テーブルの `data_date` の最大値を求めるというのはまさにこのメタデータを利用できそうです
+  * しかし実際には集計の計算が動いてしまっています
 
 なぜこの二点が起きてしまっているかを理解することで、どうすればこれを解決しクエリを最適化できるかがわかるようになります。
 
@@ -190,10 +188,9 @@ group by data_date;
 ### 解決策①：クエリの分割
 
 直接リテラルで指定できれば苦労はしません。毎回テーブルの最大の日付で動的に絞り込みたい、というケースは多々あるでしょう。
-サブクエリを使っていると計算してみないとフィルター条件が定まらない、ということが根本原因なので、事前に計算しておければ問題ないはずです。
-つまりクエリを分割しましょう。
+サブクエリを使っていると計算してみないとフィルター条件が定まらない、ということが根本原因なので、事前に計算しておければ問題ないはずです。つまりクエリを分割ししてしまえばよいわけです。
 
-具体的にはサブクエリの結果を一旦変数に代入し、それを where 句で利用すれば良いです。こうすることで解決策①と同様な理由により Pruning が効くようになります。
+具体的にはサブクエリの結果を一旦変数に代入し、それを where 句で利用すれば良いです。こうすることで、前節の実験と同様に定数で条件を指定したことになり Pruning が効くようになります。
 
 ```sql
 set data_date_max = (select max(data_date) from pos_sample_1);
@@ -208,7 +205,7 @@ group by data_date;
 
 dbt であれば [`run_query`]( https://docs.getdbt.com/reference/dbt-jinja-functions/run_query ) を用いてサブクエリを事前に実行し、その結果を変数に格納したのちに、メインのクエリからはその変数を参照するように変更すれば良いです。
 
-これらの対応によりサブクエリをなくしてフィルター条件には定数を利用するようになるため、問題が解決します。
+これらのクエリ分割の対応によりサブクエリを無くすことで、フィルター条件には定数を利用するようになるため、問題が解決します。
 
 
 
@@ -216,20 +213,19 @@ dbt であれば [`run_query`]( https://docs.getdbt.com/reference/dbt-jinja-func
 
 そもそもサブクエリとして実行していた、 `select max(data_date) from pos_sample_1` は単なるカラムの最大値を求めるシンプルなものでした。
 
-これは Cloud Service Layer で収集されているメタデータから取得できそうに思えます。そう考えるとコンパイル時にこのサブクエリの結果は分かってもおかしくないはずで、 partition pruning が効かなかったのも不思議に感じてきます。
+これは Cloud Service Layer で収集されているメタデータから取得できそうに思えます。そう考えるとコンパイル時にこのサブクエリの結果は分かってもおかしくないはずで、 partition pruning が効かなかったのも不思議に思えます。
 
 実はこれは Snowflake におけるキャッシュの一つである Metadata Cache の仕様によるものです。
 
 
 ### Snowflake の Metadata Cache おさらい
 
-Snowflake は Cloud Service Layer 
 データ型によって "METADATA-BASED RESULT" で cloud service layer で返せるかどうかが変わります。
 
 詳細は以下のブログを参照してください。
 https://zenn.dev/finatext/articles/snowflake-chache
 
-まずはテスト用のデータを用意しましょう。
+データ型によって挙動が変わる事を確認します。まずはテスト用のデータを用意しましょう。
 ```sql
 create or replace table cache_test (id int, code varchar, name varchar) as
 select seq8(), 'code-' || seq4()%100, randstr(10, random())
@@ -260,14 +256,14 @@ select min(code), max(code) from cache_test;
 
 実は `pos_sample_1` テーブルでは `data_date` 列を varchar 型で定義されていました。
 その結果、 `select max(data_date) from pos_sample_1` というサブクエリは "METADATA-BASE RESULT" は利用できず、毎回集計処理が必要だったというわけです。
-そのためコンパイル時にはフィルター条件が定まらず Pruning ができなかったということになります。
+更にこれがコンパイル時にはフィルター条件が定まらないことに繋がり、 Pruning ができなかったということになります。
 
 そこで、 `data_date` 列を date 型で定義し直した `pos_sample_2` テーブルを作ってみましょう。
 
 ```sql
 create or replace table pos_sample_2 (data_date date, store_id int, sales int) as
 select 
-    dateadd(day, trunc(seq4()/100000), '2020-01-01'::date) as data_date, 
+    dateadd(day, trunc(seq4()/100000), '2020-01-01'::date) as data_date, -- to_char を無くす
     seq4()%100000 as store_id, 
     abs(random(123)) as sales
 from table(generator(rowcount => 100000*1000))
