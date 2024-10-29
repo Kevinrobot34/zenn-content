@@ -21,7 +21,7 @@ Snowflake での select のクエリを最適化するためには「不要な�
 
 * クエリコンパイルは Cloud Service Layer で行われる
 * Partition Pruning はクエリコンパイルの中で実行される
-* 一般にサブクエリは計算しないと結果が分からないため、サブクエリによる絞り込みは Partiton Pruning と相性が悪い
+* 一般にサブクエリは計算しないと結果が分からないため、サブクエリによる絞り込みは Partition Pruning と相性が悪い
 * サブクエリを使わないようにクエリを分割し変数などを使うと Pruning が効くようになる
 * またサブクエリを使った条件であっても Metadata Cache を利用できるものであれば Partition Pruning が可能
 
@@ -121,7 +121,7 @@ group by data_date;
 この Profile を見ると、パフォーマンス的に問題になるのは以下の二点です。
 
 * Step2 において partition pruning が効いていない
-  * 64/64 全ての parittion がスキャンされていることがわかります
+  * 64/64 全ての partition がスキャンされていることがわかります
   * 今回のテストテーブルは小さいですが、大きいテーブルだとここで時間がかかることになります
 * Step1 において集計処理がされていること
   * よく「Snowflakeではパーティションごとに最小値・最大値などのメタデータ・統計情報を収集している」と言いますが、テーブルの `data_date` の最大値を求めるというのはまさにこのメタデータを利用できそうです
@@ -255,7 +255,7 @@ select min(code), max(code) from cache_test;
 ### 解決策②：データ型を変更する
 
 実は `pos_sample_1` テーブルでは `data_date` 列を varchar 型で定義されていました。
-その結果、 `select max(data_date) from pos_sample_1` というサブクエリは "METADATA-BASE RESULT" は利用できず、毎回集計処理が必要だったというわけです。
+その結果、 `select max(data_date) from pos_sample_1` というサブクエリは "METADATA-BASED RESULT" は利用できず、毎回集計処理が必要だったというわけです。
 更にこれがコンパイル時にはフィルター条件が定まらないことに繋がり、 Pruning ができなかったということになります。
 
 そこで、 `data_date` 列を date 型で定義し直した `pos_sample_2` テーブルを作ってみましょう。
@@ -292,7 +292,7 @@ group by data_date;
 * クエリコンパイルは Cloud Service Layer で行われる
 * Partition Pruning はクエリコンパイルの中で実行される
     * そのため Compile 時にフィルター条件が確定しないと Partition Pruning は実行できない
-* 一般にサブクエリは計算しないと結果が分からないため、サブクエリを利用したフィルター条件を利用していると Partiton Pruning は実行できない
+* 一般にサブクエリは計算しないと結果が分からないため、サブクエリを利用したフィルター条件を利用していると Partition Pruning は実行できない
 * サブクエリの結果を変数に代入する形でクエリを分割し、フィルター条件ではその変数を参照する形にすると Pruning が効くようになる
 * サブクエリを使った条件であっても Metadata Cache を利用できるようなサブクエリであればその結果はコンパイル時に分かるため、 Pruning は効く
     * Min/Maxを取るようなシンプルなクエリであってもデータ型によって Metadata Cache を利用できるかは変わる
