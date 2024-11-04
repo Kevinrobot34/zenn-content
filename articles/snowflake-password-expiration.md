@@ -36,7 +36,8 @@ https://docs.snowflake.com/ja/user-guide/admin-user-management#label-using-passw
 
 この時、パスワードの有効期限が切れてしまうと、**キーペアで認証を行おうとしても以下のようにパスワードの変更を求めるエラーが出てしまいます。**
 ```
-250001 (08001): Failed to connect to DB: abc123xy9-sample_account..snowflakecomputing.com:443. Specified password has expired. Password must be changed using the Snowflake web console.
+250001 (08001): Failed to connect to DB: abc123xy9-sample_account..snowflakecomputing.com:443. 
+Specified password has expired. Password must be changed using the Snowflake web console.
 ```
 
 
@@ -83,7 +84,6 @@ https://docs.snowflake.com/ja/user-guide/authentication-policies
 
 
 ## まとめ
-
 
 * パスワード認証と他の認証方法を組み合わせた場合、任意の認証方法利用時にパスワードの有効期限切れのエラーは出てしまう
 * パスワードを更新するか、パスワードをNullにすれば対応可能
