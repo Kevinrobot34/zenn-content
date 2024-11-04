@@ -46,7 +46,10 @@ Specified password has expired. Password must be changed using the Snowflake web
 パスワード認証とSSOを組み合わせている場合でも同様です。
 一度パスワードが期限切れとなると、SSOでログインしようとした場合もパスワードの変更を求めるエラーが出てしまいます。
 
-https://community.snowflake.com/s/article/Snowflake-Password-has-Expired-using-Single-Sign-On-SSO-authentication
+> KNOWLEDGE BASE ARTICLES
+> Snowflake Password has Expired using Single Sign On (SSO) authentication
+> This article explains the cause for the password expired error while connecting to Snowflake using Single Sign On Authentication and the steps to resolve it
+> https://community.snowflake.com/s/article/Snowflake-Password-has-Expired-using-Single-Sign-On-SSO-authentication
 
 
 ## 対応策
