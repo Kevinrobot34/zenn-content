@@ -1,6 +1,6 @@
 ---
 title: "Snowflakeのパスワードの有効期限切れの罠"
-emoji: "👻"
+emoji: "❄️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "Authentication", "Security", "DataEngineering"]
 published: false
