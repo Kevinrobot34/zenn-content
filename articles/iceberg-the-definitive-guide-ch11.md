@@ -2,7 +2,7 @@
 title: "Apache Iceberg: The Definitive Guid 11章 Streaming with Apache Iceberg"
 emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Iceberg", "DataEngienering", "OTF", "Snowflake"]
+topics: ["Iceberg", "DataEngineering", "OTF", "Snowflake"]
 published: false
 publication_name: dataheroes
 ---
@@ -17,3 +17,32 @@ SnowVillage で行っている [Apache Iceberg: The Definitive Guid]( https://ww
 :::message
 この形式が私の感想・コメントです
 :::
+
+
+### 11章の introduction
+
+ストリーミングデータとはさまざまなソースから継続的に生成され処理されるデータのことを指します。ログファイルやセンサーデータ、ソーシャルメディアのフィードなど、様々なデータソースから日々データは生成されています。これらのデータが小さいサイズに分割され送信され、リアルタイムで処理されるわけです。
+
+ストリーミングデータは現在さまざまな場所で利用されていますが、これらを Apache Iceberg table として取り込むメリットは以下の通りです。
+
+* Scalability and performance
+* Schema evolution
+* Reliability
+* Time travel
+
+
+## Streaming into Iceberg with Spark
+
+
+
+
+
+
+Streaming from Iceberg with Spark
+Streaming with Flink
+Streaming into Iceberg with Flink
+Example of Streaming into Iceberg with Flink
+Streaming with Kafka Connect
+The Iceberg Kafka Sink
+Streaming with AWS
+Conclusion

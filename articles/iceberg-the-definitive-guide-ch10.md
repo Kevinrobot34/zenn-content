@@ -2,7 +2,7 @@
 title: "Apache Iceberg: The Definitive Guid 10章 Apache Iceberg in Production"
 emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Iceberg", "DataEngienering", "OTF", "Snowflake"]
+topics: ["Iceberg", "DataEngineering", "OTF", "Snowflake"]
 published: true
 publication_name: dataheroes
 ---
@@ -42,7 +42,7 @@ SnowVillage で行っている [Apache Iceberg: The Definitive Guid]( https://ww
     * metadata table を利用し、パフォーマンスに影響が出る前からパーティションのサイズを監視しておく
     * branch を利用し、悪いデータが直接本番のテーブルに取り込まれないような運用をする
 
-なるべく proactive に動いて様々な問題を予防することも大事ですが、reacitve な方法も適切に知っておき何か問題が起きた時に迅速に対応できるようになっておくことももちろん大事です。
+なるべく proactive に動いて様々な問題を予防することも大事ですが、reactive な方法も適切に知っておき何か問題が起きた時に迅速に対応できるようになっておくことももちろん大事です。
 
 早速それぞれの機能について具体的に見ていきましょう。
 
@@ -160,7 +160,7 @@ Nessie をカタログでは、データレイク全体を一つのエンティ�
 
 ## Multi-table Transactions
 
-Multi-table Transaction は複数テーブルにまたがる操作の "consistency" と "isolatioon" を実現するために重要です。
+Multi-table Transaction は複数テーブルにまたがる操作の "consistency" と "isolation" を実現するために重要です。
 
 Multi-table transaction では、複数の操作（これは複数のテーブルにまたがる場合もある）が一つのアトミックな作業の単位として扱われます。これはつまりこれらの複数の操作が成功するか、もしくはいずれかが失敗した場合には全ての変更がロールバックされ元に戻るということを意味します。
 
@@ -172,7 +172,7 @@ Multi-table transaction はデータの整合性を維持するために非常�
 具体例を考えましょう。
 例えばサプライチェーン管理システムがあり注文を管理する `Order` テーブルと、在庫を管理する `Inventory` テーブルがあるとする。注文があると `Order` が更新されると共に、 `Inventory` の該当する在庫のレコードは減らされます。
 もしこの２つの操作が一つのトランザクションとして取り扱われなかった場合、 `Order` は更新されるが、 `Inventory` だけロールバックされ在庫の減少がデータベースに反映されない、みたいなことが起こり得ます。
-逆に、２つの操作が一つのトランザクションとして取り扱われると、 `Order` の更新は成功して `Inventory` の更新は失敗した場合、`Inventroy`も`Order`もどちらもロールバックされて元の状態に戻る。こうしてデータの整合性は保たれるわけです。
+逆に、２つの操作が一つのトランザクションとして取り扱われると、 `Order` の更新は成功して `Inventory` の更新は失敗した場合、`Inventory`も`Order`もどちらもロールバックされて元の状態に戻る。こうしてデータの整合性は保たれるわけです。
 
 このように複数テーブルにまたがった consistency を維持するためには Multi-table transaction は重要な役割を果たします。
 
@@ -188,7 +188,7 @@ https://medium.com/@tglawless/apache-iceberg-acid-transactions-ec9d7b7afff5
 
 ### 現状
 
-10章で触れられているものの、2024年10月末現在、 Apache Icebrg としてはまだ Multi-table Transaction は開発中です。関連資料は以下。
+10章で触れられているものの、2024年10月末現在、 Apache Iceberg としてはまだ Multi-table Transaction は開発中です。関連資料は以下。
 
 * [apache/iceberg: Add Multi-Table Transaction API #10617]( https://github.com/apache/iceberg/issues/10617 )
 * [DesignDocs - Multi-Table Transactions in Iceberg]( https://docs.google.com/document/d/1UxXifU8iqP_byaW4E2RuKZx1nobxmAvc5urVcWas1B8/edit?tab=t.0 )

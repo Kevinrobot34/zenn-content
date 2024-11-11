@@ -2,7 +2,7 @@
 title: "Apache Iceberg: The Definitive Guid 12章 Governance and Security"
 emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Iceberg", "DataEngienering", "OTF", "Snowflake"]
+topics: ["Iceberg", "DataEngineering", "OTF", "Snowflake"]
 published: false
 publication_name: dataheroes
 ---
@@ -20,7 +20,7 @@ SnowVillage で行っている [Apache Iceberg: The Definitive Guid]( https://ww
 
 
 
-### Iceberg と Security
+### 12章の introduction
 
 Iceberg は OTF でありメタデータファイルとデータファイルとでデータセットを構成する方法を定義してはいますが、セキュリティに関する詳細は（一部暗号化に関するプロパティなどはありますが）基本的に組み込まれていません。そのため、さまざまなレイヤで独自に設定する必要があります。
 
@@ -51,7 +51,7 @@ Iceberg は OTF でありメタデータファイルとデータファイルと�
         * **真正性 / Authenticity**
         * **責任追跡性 / Accountability**
             * インシデント発生時、その影響範囲や経路をエビデンスとともに厳密に特定できるようになっていること
-            * Traceablility と言ってもいいかも
+            * Traceability と言ってもいいかも
             * 関連技術：ログ
         * **否認防止 / Non-repudiation**
         * **信頼性 / Reliability**
@@ -60,7 +60,7 @@ Iceberg は OTF でありメタデータファイルとデータファイルと�
 
 
 :::message
-３つのレイヤでのセキュリティ・ガバナンスが紹介されておりどれかを選ぶ的な書き方をしている気がしましたが、多層防御の考え方に基づくと適切に組み合わせるのが大事だと考えています。一方で適当に組み合わせてしまうと管理が大変にもなりそうなので、適切なセキュリティ・ガバナンスの設計が大事になると思います。
+多層防御の考え方に基づくと３つのレイヤのセキュリティを適切に組み合わせるのが大事だと考えています。一方で適当に組み合わせてしまうと管理が大変にもなりそうなので、適切なセキュリティ・ガバナンスの設計が大事になると思います。
 :::
 
 
@@ -72,7 +72,7 @@ Iceberg は OTF でありメタデータファイルとデータファイルと�
 
 
 
-## Securing Datafiles
+## Securing files
 
 まずはファイルレベル・ストレージレベルでのセキュリティについてです。
 
@@ -278,46 +278,50 @@ Google Cloud Storage でもほとんど同じです。暗号化とアクセス�
 ## Securing and Governing at the Semantic Layer
 
 
-### Semantic layer とは？
+### Semantic Layer Best Practices
 
 
-Semantic layer とはデータストレージと分析に使われるツール（BIツールなど）の間に位置する抽象化レイヤーのことで、エンドユーザーが一般的なビジネス用語を用いて自律的にデータにアクセスし分析できるようにするための、データのビジネス表現。
+Semantic layer とはデータストレージと分析に使われるツール（BIツールなど）の間に位置する抽象化レイヤーのことで、エンドユーザーが一般的なビジネス用語を用いて自律的にデータにアクセスし分析できるようにするための、データのビジネス表現です。
 
-https://www.dremio.com/blog/what-is-a-semantic-layer/
+![semantic-layer](/images/articles/iceberg-the-definitive-guide-ch12/semantic-layer.png =400x)
+*https://www.dremio.com/blog/what-is-a-semantic-layer/ より*
 
-https://www.dremio.com/blog/unified-semantic-layer-a-modern-solution-for-self-service-analytics/
+さまざまな機能があり、セマンティックレイヤで以下のようなことを行うことが良いとされています。
+
+* 📖ビジネスフレンドリーな語彙でデータを見ることができる
+  * ビジネスユーザーが使い慣れた言葉に置き換え、データを活用しやすくする
+* 📖物理的なデータ・データモデルの複雑さの隠蔽
+  * 物理的なデータの詳細を知らなくてもデータを利用できるようにする
+* 📖ビジネスロジックの中央化
+  * 各所に散らばりがちなビジネスロジックを中央管理することで、計算方法が微妙に違うと言ったことを防ぐ
+* アクセス制御の実現
+  * 包括的なアクセス制御をRBACやABACで実現する
+* データマスキング
+  * PIIなどセンシティブなデータは適切にマスキングしておく
+* データリネージュの管理
+  * データの依存関係を追跡しておくことで、データの理解を助けるだけでなく、データの品質管理やコンプライアンスにも役に立つ
+* あらゆるもののドキュメント化
+  * ガバナンスやセキュリティのポリシー、アクセス制御、カタログ、リネージュなどあらゆるものに詳細なドキュメントをつけておくことで、透明性やコンプライアンス、トラブルシューティングに役に立つ
+
+セマンティックレイヤーに関する詳細は以下などを参照してください。
 
 https://zenn.dev/churadata/articles/e779a733c5fb35
 
+https://www.dremio.com/blog/unified-semantic-layer-a-modern-solution-for-self-service-analytics/
 
 https://www.dremio.com/blog/the-value-of-dremios-semantic-layer-and-the-apache-iceberg-lakehouse-to-the-snowflake-user/
 
 
-https://www.starburst.io/data-glossary/semantic-layer/
 
 
-### Semantic Layer Best Practices
-
-* Understand your data
-    * 
-* Define clear access control policies
-    * 包括的なアクセス制御を
-    * RBAC や ABAC で実現する
-* Implement data masking
-* Maintain data lineage
-* Document everything
-
-
-semantic layer でのセキュリティの pros / cons
+semantic layer でのセキュリティの pros / cons には以下のようなものがあります。
 
 * pros
     * 統一的なデータアクセス制御
-    * 標準化したデータガバナンス・セキュリティポリシーの適用を可能にする
+    * 標準化したデータガバナンス・セキュリティポリシーの適用が可能
     * データを抽象化し、エンドユーザーがデータを簡単に利用できるようになる
 * cons
     * セマンティックレイヤが単一障害点となる
-
-
 
 
 
@@ -329,8 +333,8 @@ Dremio の semantic layer は以下の機能を提供している
 * Built-in wiki for documentation
 * Role-, column-, and row-based access rules
     * より細かいアクセス制御を提供している
-    * RBAC はよくある感じ
-    * coulmn-based access control
+    * RBAC はよくあるやつ
+    * column-based access control
         * PII を含むなど特定のカラムをマスキングすることができる
         * dremio だと udf を利用するようなイメージ
             ```sql
@@ -401,14 +405,42 @@ https://trino.io/docs/current/sql/create-view.html
 RBAC も Snowflake と同様な感じでできる。
 
 
+:::message
+Semantic layer に詳しいわけではないですが、Dremioの例もTrinoの例も Semantic Layer 感はあんまりない気がします
+:::
+
+
 
 ## Securing and Governing at the Catalog Level
 
+カタログは Lakehouse アーキテクチャの重要な構成要素であり、メタデータを管理し、効率的なクエリ実行を可能にします。この節ではカタログをセキュリティ敵に保護し適切に管理する方法を確認します。
+
+Iceberg におけるカタログについては5章で確認しました。詳細はこちらをご覧ください。
+
+https://zenn.dev/musyu/articles/5d9ee475f5f51a
+
+カタログレベルでセキュリティの設定をすると、どのクエリエンジンからアクセスされた際にも一貫したアクセス制御やセキュリティポリシーの適用が可能になり、データのクエリ・分析方法に依存しない統一したセキュリティを確保できるため非常に重要になります。
 
 
-:::message
-クエリエンジンがストレージにアクセスできるよう、 Credential Vending で一時的な認証情報を自動発行したりする役割がカタログにはあったりすると思いますが、その辺りの話はあまり載っていなくて、ちょっと気になってます。
-:::
+カタログレベでのセキュリティの pros / cons には以下のようなものがあります。
+* pros
+  * カタログはメタデータが中央に集められた場所なため、メタデータに基づいた一貫したセキュリティ・ガバナンスポリシーの適用が可能になる
+  * テーブルやデータデータベースへの包括的なアクセス制御が実現可能
+  * カタログはストレージを抽象化したレイヤなため、ファイルレベルよりもシンプルなアクセス制御が提供可能
+* cons
+  * カタログが単一障害点になる
+  * 選択したカタログによって実現可能性が異なってしまう
+
+
+
+### Nessie
+
+
+### Tabular
+
+
+### AWS Glue and Lake Formation
+
 
 
 
@@ -432,7 +464,7 @@ RBAC も Snowflake と同様な感じでできる。
     * どうやって抽象化・簡素化してユーザーやツールがアクセスしやすくするかを考えておくのも大事
 * Operational overhead
     * オペレーションコストも無視できないので大事
-* Redudancy and failover
+* Redundancy and failover
     * 可用性と信頼性を担保するために冗長化などどうするかも考えないといけない
 
 
@@ -440,3 +472,5 @@ RBAC も Snowflake と同様な感じでできる。
 ## まとめ
 
 
+セキュリティやガバナンスを実現するための銀の弾丸はないです。
+適切に各レイヤでのセキュリティ・ガバナンスを組み合わせ、組織の要件を満たせるようにするのが大事です。
