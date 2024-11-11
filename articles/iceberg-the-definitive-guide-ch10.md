@@ -73,7 +73,7 @@ https://iceberg.apache.org/docs/latest/spark-queries/#inspecting-tables
 
 各テーブルの中身については 10章前半として発表していただいた Doi さんの資料の中で解説されているので、こちらをご参照ください。
 
-**後で資料のリンクを貼る**
+https://speakerdeck.com/riu/apache-iceberg-the-definitive-guide-lun-du-hui-10zhang-apache-iceberg-in-production-qian-ban-bu-fen
 
 
 
