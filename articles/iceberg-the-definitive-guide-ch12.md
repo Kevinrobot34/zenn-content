@@ -1,5 +1,5 @@
 ---
-title: "Apache Iceberg: The Definitive Guid 12章 Governance and Security"
+title: "Apache Iceberg: The Definitive Guide 12章 Governance and Security"
 emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Iceberg", "DataEngineering", "OTF", "Snowflake"]

@@ -1,5 +1,5 @@
 ---
-title: "Apache Iceberg: The Definitive Guid 11章 Streaming with Apache Iceberg"
+title: "Apache Iceberg: The Definitive Guide 11章 Streaming with Apache Iceberg"
 emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Iceberg", "DataEngineering", "OTF", "Snowflake"]
