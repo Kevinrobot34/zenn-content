@@ -1,9 +1,10 @@
 ---
 title: "Apache Iceberg: The Definitive Guid 11章 Streaming with Apache Iceberg"
-emoji: "🔖"
+emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: []
+topics: ["Iceberg", "DataEngienering", "OTF", "Snowflake"]
 published: false
+publication_name: dataheroes
 ---
 
 

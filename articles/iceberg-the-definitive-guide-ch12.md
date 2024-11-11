@@ -1,9 +1,10 @@
 ---
 title: "Apache Iceberg: The Definitive Guid 12章 Governance and Security"
-emoji: "🎃"
+emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: []
+topics: ["Iceberg", "DataEngienering", "OTF", "Snowflake"]
 published: false
+publication_name: dataheroes
 ---
 
 
@@ -80,29 +81,28 @@ Iceberg は OTF でありメタデータファイルとデータファイルと�
 
 ファイルに関するセキュリティでのベストプラクティスは以下です。
 
-* Least privilege access / 最小権限の原則
+* **Least privilege access / 最小権限の原則**
     * 人やシステムに対して、目前のタスクを実行するために必要十分な権限とデータだけを与えるということ
     * 機密性を担保し、また事故が起きた時のリスクを最小限にすることができる
     * 📖 定義的な最小性と時間的な最小性がある
         * 定義的な最小性
             * 人にもシステムにも必要な権限のみ付与する
-            * 例：S3FullAccess ではなく、必要なアクションのみ定義されたポリシーを付与する
         * 時間的な最小性
             * 特定の権限（特に強い権限）が永続的に必要なことはほとんどない
-            * 作業するタイミングだけ権限を付与すれば良い
-* Encryption at rest and in transit / 暗号化
+            * 作業するタイミングだけ権限を付与する
+* **Encryption at rest and in transit / 暗号化**
     * 保存時と通信時両方でそれぞれ暗号化しよう
     * 機密性を担保し、万が一データが流出してもデータの中身を直接見られないようにしておく
-* Strong authentication and identity management
+* **Strong authentication and identity management**
     * IAM による認証・認可を適切に実行し機密性を担保すること
         * MFA設定しようとか強いパスワード設定しようとかも含む
-* Audit trails and logging / 監査証跡とログ
+* **Audit trails and logging / 監査証跡とログ**
     * 何か事故が起きた時に適切に検証できるようにし、責任追跡性を担保すること
     * 端的にいうとログはちゃんと記録しておこう、という話
-* Data retention and disposal policies
+* **Data retention and disposal policies**
     * 適切に保存期間や廃棄に関するポリシーを定めておくことで、保護対象を減らすことでリスクを減らすこと
     * コスト的にも不要なデータを削除することは大事
-* Continuous monitoring 
+* **Continuous monitoring **
     * 継続的にモニタリングして、インシデントをリアルタイムで検出しましょう的な
     * いわゆる発見的統制の一種
 
@@ -113,8 +113,7 @@ Iceberg は OTF でありメタデータファイルとデータファイルと�
 * pros
     * 柔軟なアクセス制御や暗号化の設定が可能で、認可されていないアクセスからのリスクを下げられる
 * cons
-    * ファイル数が増えるにつれ、管理対象が増え複雑になる
-        * スケールしにくい
+    * ファイル数が増えるにつれ、管理対象が増え複雑になるためスケールしにくい
     * ユーザーやツールには簡潔なデータの見せ方が必要になるかも
 
 
@@ -168,8 +167,7 @@ Iceberg は OTF でありメタデータファイルとデータファイルと�
 
 https://manual.geeko.jp/ja/cha.security.acls.html
 
-https://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-hdfs/HdfsPermissionsGuide.html
-
+https://hadoop.apache.org/docs/r3.4.0/hadoop-project-dist/hadoop-hdfs/HdfsPermissionsGuide.html
 
 
 #### Encryption
@@ -186,8 +184,7 @@ https://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-hdfs/HdfsPermis
 
 詳細は以下を参照してください。
 
-https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/TransparentEncryption.html
-
+https://hadoop.apache.org/docs/r3.4.0/hadoop-project-dist/hadoop-hdfs/TransparentEncryption.html
 
 
 ### Amazon S3
@@ -196,16 +193,17 @@ https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/Transparen
 
 #### Encryption
 
-* Server-Side Encryption
-    * SSE-S3 (SSE with S3-managed keys)
-        * 透過的によしなにやってくれるやつ
-        * S3が管理する鍵で暗号化する
-    * SSE-KMS (SSE with the AWS KMS)
-        * AWS KMS を利用して、暗号化に使うキーを指定して行う方法
-        * SSE-S3 よりもより強固な要件が求められる時によく使う
-    * SSE-C (SSE with Customer-provided keys)
-        * 顧客が提供するキーを利用して暗号化を行うやつ
-        * AWSはキーを触れず一番安全ではあるが、鍵の管理などはすべて顧客がやらないといけない
+Server-Side Encryption の方法が３つ提供されています。
+
+* SSE-S3 (SSE with S3-managed keys)
+    * 透過的によしなにやってくれるやつ
+    * S3が管理する鍵で暗号化する
+* SSE-KMS (SSE with the AWS KMS)
+    * AWS KMS を利用して、暗号化に使うキーを指定して行う方法
+    * SSE-S3 よりもより強固な要件が求められる時によく使う
+* SSE-C (SSE with Customer-provided keys)
+    * 顧客が提供するキーを利用して暗号化を行うやつ
+    * AWSはキーを触れず一番安全ではあるが、鍵の管理などはすべて顧客がやらないといけない
 
 この辺りの鍵の設定は Iceberg Table でも設定可能で、以下のようなプロパティが用意されています。
 * s3.sse.type
@@ -215,6 +213,7 @@ https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/Transparen
 
 #### Access Control
 
+アクセス制御の方法も複数用意しています。
 
 * Bucket policies
     * いわゆる resource based policy 
@@ -254,18 +253,25 @@ S3 のようなオブジェクトストレージは古くからあるサービ�
 
 ### Azure Data Lake Storage
 
+Azure Data Lake Storage でもほとんど同じです。暗号化とアクセス制御の設定は適切に行なっておきましょう。
 
 * Encryption
-* RBAC
-* ACLs
+  * Azure Key Vault を組み合わせることも可能
+* Access Control
+  * IAM(RBAC)
+  * ACLs
 
 
 
 ### Google Cloud Storage
 
+Google Cloud Storage でもほとんど同じです。暗号化とアクセス制御の設定は適切に行なっておきましょう。
+
 * Encryption
-* IAM
-* Object ACLs
+  * Cloud KMS を組み合わせることも可能
+* Access Control
+  * IAM
+  * Object ACLs
 
 
 
@@ -428,3 +434,9 @@ RBAC も Snowflake と同様な感じでできる。
     * オペレーションコストも無視できないので大事
 * Redudancy and failover
     * 可用性と信頼性を担保するために冗長化などどうするかも考えないといけない
+
+
+
+## まとめ
+
+
