@@ -8,5 +8,12 @@
         "dateadd",
         "trunc",
         "randstr",
+        "trino",
+        "nessie",
+        "Dremio",
+        "hdfs",
+        "dmbok",
+        "abac",
+        "lakehouse",
     ],
 }
