@@ -38,6 +38,7 @@ https://speakerdeck.com/kevinrobot34/apache-iceberg-the-definitive-guide-ch1
 ### 2: The Architecture of Apache Iceberg
 
 2章では Iceberg のアーキテクチャを深掘ります。データファイルとメタデータファイルの階層構造の説明や、それがどのように Iceberg の各種特性や機能に役立っているのかが具体的に理解できるようになるはずです。
+本ではあまり触れられていない Puffin Files や Theta sketch による NDV に関する話題なども資料ではまとめていただいています。
 
 https://speakerdeck.com/bering/apache-iceberg-the-definitive-guide-lun-du-hui-2zhang-the-architecture-of-apache-iceberg
 
@@ -79,21 +80,35 @@ https://zenn.dev/musyu/articles/5d9ee475f5f51a
 
 ## Part2: Hands-on with Apache Iceberg
 
+Part2 では Iceberg のハンズオンとして Spark などで実際に Iceberg を利用していく方法について解説されています。
+
+
 ### 6: Apache Spark
 
+6章では処理エンジンとして Spark を利用する際の具体的な設定方法などについて述べられています。
+以下の資料では Spark のレイヤと Iceberg のレイヤの設定項目の違いや、連携方法などについて詳しく書いていただいています。
 
 https://speakerdeck.com/tomtanaka/apache-iceberg-the-definitive-guide-lun-du-hui-di-6-zhang-apache-spark
 
+
 ### 7: Dremio’s SQL Query Engine
+
+7章では Dremio を処理エンジンとして利用する際の具体的な設定方法について述べられています。
+以下の資料では Dremio Cloud で Arctic Catalog (Nessie) を利用した際の画面もキャプチャも載せていただいています。
+Nessie 特有の Git ライクな UI などが実際に確認できます。
 
 https://speakerdeck.com/tanisuhi/iceberg-definitive-guidelun-du-hui-chapter7-and-8
 
 ### 8: AWS Glue
 
+8章では Glue のマネージドかつサーバレスなETLジョブで Iceberg テーブルを利用したり、 Glue をカタログとして利用する方法などが記載されています。
+以下の資料では Athena から Iceberg を利用する方法についても追加で解説していただいています。
+
 https://speakerdeck.com/tanisuhi/iceberg-definitive-guidelun-du-hui-chapter7-and-8
 
 ### 9: Apache Flink
 
+9章では Flink で Iceberg を利用する際の具体的な設定方法について述べられています。
 https://speakerdeck.com/tanisuhi/iceberg-definitive-guidelun-du-hui-chapter9
 
 
@@ -168,20 +183,35 @@ https://speakerdeck.com/bering/apacheicebergthedefinitiveguidelun-du-hui-chapter
 
 ## 感想
 
+輪読会を通して感想も簡単に書かせていただきます。
+
+
 ### Iceberg について
 
-
+この本を読むことを通して Iceberg に関する技術的な詳細についてはかなり解像度が上がったなと思っています。
+ただ、せっかく SnowVillage で輪読会を開催していたものの、 Snowflake x Iceberg な具体例などを出しきれなかったのは少し反省しています。
+Snowflake の Iceberg table に関する様々な機能はどんどん増えてきているため、今後もっとこの辺りは深ぼって SnowVillage で共有して議論していければと思います。
 
 
 ### 輪読会の運営について
 
-* 月曜日は祝日などになりがちなので、輪読会実施はなるべく月曜や金曜は避けておくと毎週実施がやりやすいかもしれません
-* 
+コミュニティで輪読会をやっていくのははじめてでしたが、皆さんのサポートで無事に完了し安心しております。
+いくつか個人的に学びがあったのでメモしておこうと思います。
+
+* 月曜日は祝日などになりがちなので、輪読会実施はなるべく月曜や金曜は避けておくと無難
+  * あまり長期間実施にならないように工夫できると熱量をより保ちやすい
+* 毎回 slack でリマインドすると参加率が高くなるので、忘れずにやると良い
+* 登壇者は事前に全章分確保して置けると安心
+* 発表の際に slack にコメントが多いとワイワイ感でるので、主催者としてなるべくコメントする
+  * またコメントしやすい雰囲気作りや毎回最初にアナウンスして皆さんにもコメントしてもらうようにお願いする
+
+また、輪読会の主催者をやるのは大変ではありましたが、様々なコネクションもできましたし、自分自身も非常に勉強になったので良かったなと思っています。
 
 
 ## まとめ
 
-
+Iceberg は既存の様々な課題を解決するために作られた新しい OTF で、ユニークで面白い技術です。
+Iceberg や OTF に関してはまだ日本語の資料は少ないですが、今回の輪読会で作ったこれらの資料が何らかの形で役立てば幸いです。
 
 
 ## 参考資料
@@ -191,3 +221,6 @@ https://github.com/lawofcycles/apache-iceberg-101-ja
 
 
 https://www.otftalk.com/
+
+
+https://github.com/developer-advocacy-dremio/definitive-guide-to-apache-iceberg
