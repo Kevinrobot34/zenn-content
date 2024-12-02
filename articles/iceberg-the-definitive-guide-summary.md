@@ -15,7 +15,7 @@ publication_name: dataheroes
 自分もこの時から Iceberg に興味を持ちブログを書いたりしました。
 https://zenn.dev/dataheroes/articles/snowflake-iceberg-introduction
 
-そんな中、ちょうど良いタイミングで [Apache Iceberg: The Definitive Guid]( https://www.oreilly.com/library/view/apache-iceberg-the/9781098148614/ ) が2024年5月に出版されており、 SnowVillage の有志の方たちと輪読会という形で読み進めておりました。11月末に無事に全体を読み終えましたので、今回は各章について簡単に紹介していきたいと思います。
+そんな中、ちょうど良いタイミングで [Apache Iceberg: The Definitive Guide]( https://www.oreilly.com/library/view/apache-iceberg-the/9781098148614/ ) が2024年5月に出版されており、 SnowVillage の有志の方たちと輪読会という形で読み進めておりました。11月末に無事に全体を読み終えましたので、今回は各章について簡単に紹介していきたいと思います。
 
 https://www.oreilly.com/library/view/apache-iceberg-the/9781098148614/
 
