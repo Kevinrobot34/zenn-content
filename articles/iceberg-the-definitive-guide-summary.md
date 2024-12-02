@@ -2,8 +2,8 @@
 title: "Apache Iceberg: The Definitive Guid 輪読会まとめ"
 emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Snowflake", "Iceberg", "DataEngineering"]
-published: false
+topics: ["Snowflake", "Iceberg", "DataEngineering", "OTF"]
+published: true
 publication_name: dataheroes
 ---
 
@@ -184,15 +184,12 @@ https://speakerdeck.com/bering/apacheicebergthedefinitiveguidelun-du-hui-chapter
 
 ### Iceberg について
 
-この本を通じて、Iceberg に関する技術的な詳細についての理解が深まりました。
-ただ、せっかく SnowVillage で輪読会を開催していたものの、 Snowflake x Iceberg な具体例を出しきれなかったことは少し反省点です。
-Snowflake の Iceberg table に関する様々な機能はどんどん増えてきているため、今後もっとこの辺りは深ぼって SnowVillage で共有して議論していければと思います。
+この本を通じて、Iceberg に関する技術的な詳細についての理解が深まりました。ただ、せっかく SnowVillage で輪読会を開催していたものの、 Snowflake x Iceberg な具体例を出しきれなかったことは少し反省点です。Snowflake の Iceberg table に関する様々な機能はどんどん増えてきているため、今後もっとこの辺りは深ぼって SnowVillage で共有して議論していければと思います。
 
 
 ### 輪読会の運営について
 
-コミュニティで輪読会をやっていくのははじめてでしたが、皆さんのサポートで無事に完了し安心しております。
-いくつか個人的に学びがあったのでメモしておこうと思います。
+コミュニティで輪読会をやっていくのははじめてでしたが、皆さんのサポートで無事に完了し安心しております。いくつか個人的に学びがあったのでメモしておこうと思います。
 
 * 月曜日は祝日などになりがちなので、輪読会実施はなるべく月曜や金曜は避けておくと無難
   * あまり長期間実施にならないように工夫できると熱量をより保ちやすい
@@ -206,8 +203,7 @@ Snowflake の Iceberg table に関する様々な機能はどんどん増えて�
 
 ## まとめ
 
-Iceberg は、既存のさまざまな課題を解決するために開発された新しい OTF であり、ユニークで興味深い技術です。
-Iceberg や OTF に関してはまだ日本語の資料は少ないですが、今回の輪読会で作ったこれらの資料が何らかの形で役立てば幸いです。
+Iceberg は、既存のさまざまな課題を解決するために開発された新しい OTF であり、ユニークで興味深い技術です。Iceberg や OTF に関してはまだ日本語の資料は少ないですが、今回の輪読会で作ったこれらの資料が何らかの形で役立てば幸いです。
 
 
 ## 参考資料
