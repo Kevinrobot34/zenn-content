@@ -19,7 +19,7 @@ SnowVillage で行っている [Apache Iceberg: The Definitive Guid]( https://ww
 :::
 
 
-### 11章の introduction
+## 11章の introduction
 
 ストリーミングデータとはさまざまなソースから継続的に生成され処理されるデータのことを指します。ログファイルやセンサーデータ、ソーシャルメディアのフィードなど、様々なデータソースから日々データは生成されています。これらのデータが小さいサイズに分割され送信され、リアルタイムで処理されるわけです。
 
@@ -29,12 +29,12 @@ SnowVillage で行っている [Apache Iceberg: The Definitive Guid]( https://ww
   * Iceberg は巨大なデータセットの保存・情報抽出を効率的に行えるように設計されている
   * ファイル管理のプロシージャも定義されており、パフォーマンスを維持するための仕組みも作りやすい
 * Schema evolution
-  * 時事刻々とデータが送られてくるストリーミングデータではスキーマが変化する可能性も高い
-  * Iceberg であれば Schema Evolution をサポートしており、変化に追従しながらデータを扱いやすい
+  * 時々刻々とデータが送られてくるストリーミングデータではスキーマが変化する可能性も高い
+  * Iceberg であれば Schema Evolution をサポートしており、変化に追従しながらデータを扱うことが可能
 * Reliability
-  * Iceberg の Snapshot や Transaction の仕組みが一貫して信頼性の高いデータ提供に適している
+  * Iceberg の Snapshot や Transaction の仕組みが一貫して信頼性の高くデータを取り扱うのに適している
 * Time travel
-  * 時事刻々と溜まるデータに対してタイムトラベルでクエリできると便利
+  * 時々刻々と溜まるデータに対してタイムトラベルでクエリできると便利
 
 ここから先では具体的に各種ツールでストリーミングデータを取り扱う方法を見ていきます。
 
@@ -42,7 +42,7 @@ SnowVillage で行っている [Apache Iceberg: The Definitive Guid]( https://ww
 ## Streaming into Iceberg with Spark
 
 Spark の特徴の一つはストリーミングデータを処理することが可能であることです。
-Spark Streaming を利用するkとおでスケーラブルで、スループットも信頼性も高いストリーム処理を行うことが可能です。
+Spark Streaming を利用することでスケーラブルで、スループットも信頼性も高いストリーム処理を行うことが可能になります。
 
 マイクロバッチのアプローチを取る Spark Streaming の具体的な特徴は以下の通りです
 
