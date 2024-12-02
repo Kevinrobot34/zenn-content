@@ -92,6 +92,9 @@ https://speakerdeck.com/kevinrobot34/apache-iceberg-the-definitive-guide-ch4
 
 https://speakerdeck.com/rshimajiri/apache-iceberg-the-definitive-guide-lun-du-hui-4zhang-optimizing-the-performance-of-iceberg-tables-hou-ban
 
+また、 Spark と Iceberg の連携については6章でも取り扱われているので詳細については以下の9章の資料もご覧ください。
+https://speakerdeck.com/tomtanaka/apache-iceberg-the-definitive-guide-lun-du-hui-di-6-zhang-apache-spark
+
 
 kafka から読み込み、 iceberg に書き込むサンプルコードは以下の通りです。
 
@@ -182,6 +185,8 @@ Apache Flink の特徴は以下の通りです
 
 このように Apache Flink は高速で正確でスケーラブルなストリーミングデータ処理が可能で、上記のような各種特徴からリアルタイムデータ処理の強力な選択肢となっています。
 
+Flink と Iceberg の設定の詳細については以下の9章の資料もご覧ください。
+https://speakerdeck.com/tanisuhi/iceberg-definitive-guidelun-du-hui-chapter9
 
 ## Streaming with Kafka Connect
 
