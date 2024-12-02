@@ -1,6 +1,6 @@
 ---
 title: "Apache Iceberg: The Definitive Guid 輪読会まとめ"
-emoji: "🐻‍❄️"
+emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "Iceberg", "DataEngineering"]
 published: false
@@ -101,7 +101,10 @@ https://speakerdeck.com/tanisuhi/iceberg-definitive-guidelun-du-hui-chapter9
 
 ## Part3: Apache Iceberg in Practice
 
-Part1 で
+Part1 で Iceberg の全体像を確認し、 Part2 で具体的に Iceberg を利用する方法を確認してきました。
+最後の Part3 としては Iceberg を実践的に利用するための様々なプラクティスが紹介されています。
+このパートまで読むことで実際に Iceberg を利用していく準備がはじめやすくなるはずです。
+
 
 ### 10: Apache Iceberg in Production
 
@@ -161,3 +164,30 @@ https://zenn.dev/dataheroes/articles/snowflake-iceberg-migrating
 といった事例が具体的に紹介されています。
 
 https://speakerdeck.com/bering/apacheicebergthedefinitiveguidelun-du-hui-chapter14
+
+
+## 感想
+
+### Iceberg について
+
+
+
+
+### 輪読会の運営について
+
+* 月曜日は祝日などになりがちなので、輪読会実施はなるべく月曜や金曜は避けておくと毎週実施がやりやすいかもしれません
+* 
+
+
+## まとめ
+
+
+
+
+## 参考資料
+
+
+https://github.com/lawofcycles/apache-iceberg-101-ja
+
+
+https://www.otftalk.com/
