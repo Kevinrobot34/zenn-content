@@ -19,6 +19,8 @@ https://zenn.dev/dataheroes/articles/snowflake-iceberg-introduction
 
 11月末に無事に全体を読み終えましたので、今回は各章について簡単に紹介していきたいと思います。
 
+https://www.oreilly.com/library/view/apache-iceberg-the/9781098148614/
+
 ## Part1: Fundamentals of Apache Iceberg
 
 Part1 は Apache Iceberg の基礎、ということで、 Iceberg が生まれてきた歴史や、そのアーキテクチャや仕組み、カタログなどについて解説されています。
