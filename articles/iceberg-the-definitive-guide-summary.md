@@ -35,8 +35,6 @@ https://speakerdeck.com/efexp/iceberg-the-definitive-guide-lun-du-hui-di-hui
 
 https://speakerdeck.com/kevinrobot34/apache-iceberg-the-definitive-guide-ch1
 
-snowflakeの資料ではないですが、 Data Cloud Summit 2024 直後に書いた Iceberg Table と Polaris Catalog の解説記事も参考になるかもしれません。
-https://zenn.dev/dataheroes/articles/snowflake-iceberg-introduction
 
 ### 2: The Architecture of Apache Iceberg
 
