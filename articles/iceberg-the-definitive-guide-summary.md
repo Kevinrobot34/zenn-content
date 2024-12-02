@@ -21,7 +21,8 @@ https://zenn.dev/dataheroes/articles/snowflake-iceberg-introduction
 
 ## Part1: Fundamentals of Apache Iceberg
 
-Part1 は Apache Iceberg の基礎、ということで、 Iceberg が生まれてきた歴史や、そのアーキテクチャや仕組み、カタログなどについて解説されています。このパートを読めば Iceberg がどのような技術なのか、全体像が掴めるはずです。
+Part1 は Apache Iceberg の基礎、ということで、 Iceberg が生まれてきた歴史や、そのアーキテクチャや仕組み、カタログなどについて解説されています。
+このパートを読むことで、Iceberg がどのような技術であるかの全体像を掴むことができるでしょう。
 
 ### 1: Introduction to Apache Iceberg
 
@@ -34,6 +35,8 @@ https://speakerdeck.com/efexp/iceberg-the-definitive-guide-lun-du-hui-di-hui
 
 https://speakerdeck.com/kevinrobot34/apache-iceberg-the-definitive-guide-ch1
 
+snowflakeの資料ではないですが、 Data Cloud Summit 2024 直後に書いた Iceberg Table と Polaris Catalog の解説記事も参考になるかもしれません。
+https://zenn.dev/dataheroes/articles/snowflake-iceberg-introduction
 
 ### 2: The Architecture of Apache Iceberg
 
@@ -188,8 +191,8 @@ https://speakerdeck.com/bering/apacheicebergthedefinitiveguidelun-du-hui-chapter
 
 ### Iceberg について
 
-この本を読むことを通して Iceberg に関する技術的な詳細についてはかなり解像度が上がったなと思っています。
-ただ、せっかく SnowVillage で輪読会を開催していたものの、 Snowflake x Iceberg な具体例などを出しきれなかったのは少し反省しています。
+この本を通じて、Iceberg に関する技術的な詳細についての理解が深まりました。
+ただ、せっかく SnowVillage で輪読会を開催していたものの、 Snowflake x Iceberg な具体例を出しきれなかったことは少し反省点です。
 Snowflake の Iceberg table に関する様々な機能はどんどん増えてきているため、今後もっとこの辺りは深ぼって SnowVillage で共有して議論していければと思います。
 
 
@@ -210,7 +213,7 @@ Snowflake の Iceberg table に関する様々な機能はどんどん増えて�
 
 ## まとめ
 
-Iceberg は既存の様々な課題を解決するために作られた新しい OTF で、ユニークで面白い技術です。
+Iceberg は、既存のさまざまな課題を解決するために開発された新しい OTF であり、ユニークで興味深い技術です。
 Iceberg や OTF に関してはまだ日本語の資料は少ないですが、今回の輪読会で作ったこれらの資料が何らかの形で役立てば幸いです。
 
 
