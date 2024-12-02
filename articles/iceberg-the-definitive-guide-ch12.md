@@ -287,7 +287,7 @@ Google Cloud Storage でもほとんど同じです。暗号化とアクセス�
 
 Semantic layer とはデータストレージと分析に使われるツール（BIツールなど）の間に位置する抽象化レイヤーのことで、エンドユーザーが一般的なビジネス用語を用いて自律的にデータにアクセスし分析できるようにするための、データのビジネス表現です。
 
-![semantic-layer](/images/articles/iceberg-the-definitive-guide-ch12/semantic-layer.png =450x)
+![semantic-layer](/images/articles/iceberg-the-definitive-guide-ch12/semantic-layer.png =550x)
 *https://www.dremio.com/blog/what-is-a-semantic-layer/ より*
 
 さまざまな機能があり、セマンティックレイヤで以下のようなことを行うことが良いとされています。
@@ -434,18 +434,6 @@ https://zenn.dev/musyu/articles/5d9ee475f5f51a
 * cons
   * カタログが単一障害点になる
   * 選択したカタログによって実現可能性が異なってしまう
-
-
-
-### Nessie
-
-
-### Tabular
-
-
-### AWS Glue and Lake Formation
-
-
 
 
 
