@@ -1,5 +1,5 @@
 ---
-title: "Apache Iceberg: The Definitive Guid 輪読会まとめ"
+title: "Apache Iceberg: The Definitive Guide 輪読会まとめ"
 emoji: "🧊"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "Iceberg", "DataEngineering", "OTF"]
