@@ -82,12 +82,82 @@ https://zenn.dev/musyu/articles/5d9ee475f5f51a
 ### 6: Apache Spark
 
 
+https://speakerdeck.com/tomtanaka/apache-iceberg-the-definitive-guide-lun-du-hui-di-6-zhang-apache-spark
+
 ### 7: Dremio’s SQL Query Engine
 
+https://speakerdeck.com/tanisuhi/iceberg-definitive-guidelun-du-hui-chapter7-and-8
 
 ### 8: AWS Glue
 
+https://speakerdeck.com/tanisuhi/iceberg-definitive-guidelun-du-hui-chapter7-and-8
 
 ### 9: Apache Flink
 
+https://speakerdeck.com/tanisuhi/iceberg-definitive-guidelun-du-hui-chapter9
 
+
+
+
+## Part3: Apache Iceberg in Practice
+
+Part1 で
+
+### 10: Apache Iceberg in Production
+
+10章では Iceberg を本番運用していく中で大事となる様々な Tips が紹介されています。具体的には
+
+* Metadata Tables
+* Branching and Tagging
+* Multi-table Transactions
+* Rollback
+
+などです。これらを reactive または proactive に適切に利用していくことで、安全かつ信頼性の高い Iceberg table の運用が可能となります。
+
+
+https://speakerdeck.com/riu/apache-iceberg-the-definitive-guide-lun-du-hui-10zhang-apache-iceberg-in-production-qian-ban-bu-fen
+
+
+https://zenn.dev/dataheroes/articles/iceberg-the-definitive-guide-ch10
+
+
+### 11: Streaming with Apache Iceberg
+
+11章では Iceberg を Streaming data に対して利用する際の話がまとめられています。
+Streaming data はデータ量が多く、スキーマも変化していく可能性も高いデータですが、 Iceberg はこれらを取り扱えるように設計されているため、相性は良いわけです。
+Spark や Flink 、 Kafka Connect を Streaming data に利用する方法、またその際の注意点などがまとめられています。
+
+https://zenn.dev/dataheroes/articles/iceberg-the-definitive-guide-ch11
+
+
+### 12: Governance and Security
+
+12章では Iceberg のガバナンスとセキュリティについてまとめられています。
+Iceberg 自身には実はセキュリティの要件は直接は定義されていません。 Iceberg を本格的に運用していくと、 Iceberg のデータファイルやメタデータファイル、そしてカタログがデータ・メタデータの中心になっていくため、ここのセキュリティを強固にしておくことは非常に重要になります。
+
+この章ではファイルレベル・セマンティックレイヤーレベル・カタログレベルそれぞれで考えるべきガバナンスやセキュリティについてまとめられています。
+
+https://zenn.dev/dataheroes/articles/iceberg-the-definitive-guide-ch12
+
+
+### 13: Migrating to Apache Iceberg
+
+13章では Iceberg へマイグレーションする方法やその際の注意点についてまとめられています。
+新規のデータパイプラインやデータ基盤で Iceberg を利用する場合にはこれまでの章の情報でも十分かもしれませんが、
+既存のデータパイプラインやデータ基盤を Iceberg に移行するとなると追加で考えるべきことは増えます。
+
+この章ではインプレース移行やシャドウ移行といった以降の方針や具体的な移行方法について述べられています。
+
+https://zenn.dev/dataheroes/articles/snowflake-iceberg-migrating
+
+
+### 14: Real-World Use Cases of Apache Iceberg
+
+14章は最終章ということで、実世界での Iceberg の具体的なユースケースが紹介されています。
+* Write-Audit-Publish (WAP) によるデータ品質管理
+* Dremio SQL Query Engine を活用した BI レポートの最適化
+* Iceberg による Change Data Capture (CDC)
+
+といった事例が具体的に紹介されています。
+
+https://speakerdeck.com/bering/apacheicebergthedefinitiveguidelun-du-hui-chapter14
