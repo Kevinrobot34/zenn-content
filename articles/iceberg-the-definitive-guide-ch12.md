@@ -20,7 +20,7 @@ SnowVillage で行っている [Apache Iceberg: The Definitive Guid]( https://ww
 
 
 
-### 12章の introduction
+## 12章の introduction
 
 Iceberg は OTF でありメタデータファイルとデータファイルとでデータセットを構成する方法を定義してはいますが、セキュリティに関する詳細は（一部暗号化に関するプロパティなどはありますが）基本的に組み込まれていません。そのため、さまざまなレイヤで独自に設定する必要があります。
 
@@ -49,12 +49,16 @@ Iceberg は OTF でありメタデータファイルとデータファイルと�
             * 関連技術：冗長化、バックアップ
     * あとから追加された要素
         * **真正性 / Authenticity**
+          * 「エンティティはそれが主張するとおりのものであるという特性」と定義されている
+          * 関連技術：認証
         * **責任追跡性 / Accountability**
             * インシデント発生時、その影響範囲や経路をエビデンスとともに厳密に特定できるようになっていること
             * Traceability と言ってもいいかも
             * 関連技術：ログ
         * **否認防止 / Non-repudiation**
+          * 「主張された事象または処置の発生、およびそれらをひきおきしたエンティティを証明する能力」と定義されている
         * **信頼性 / Reliability**
+          * 「意図する行動と結果とが一貫しているという特性」と定義されている
 * 多層防御 / Multilayer Defense
   * 近年攻撃の手口は多様化しており、不正アクセスに対する入り口の対策など単一的なセキュリティ対策だけでは不十分である。不正アクセス後の対策にも目を向けて、複数の層で対策を講じておくべきという考え方が一般的で、多層防御と呼ばれたりします。
 
@@ -102,7 +106,7 @@ Iceberg は OTF でありメタデータファイルとデータファイルと�
 * **Data retention and disposal policies**
     * 適切に保存期間や廃棄に関するポリシーを定めておくことで、保護対象を減らすことでリスクを減らすこと
     * コスト的にも不要なデータを削除することは大事
-* **Continuous monitoring **
+* **Continuous monitoring**
     * 継続的にモニタリングして、インシデントをリアルタイムで検出しましょう的な
     * いわゆる発見的統制の一種
 
@@ -283,7 +287,7 @@ Google Cloud Storage でもほとんど同じです。暗号化とアクセス�
 
 Semantic layer とはデータストレージと分析に使われるツール（BIツールなど）の間に位置する抽象化レイヤーのことで、エンドユーザーが一般的なビジネス用語を用いて自律的にデータにアクセスし分析できるようにするための、データのビジネス表現です。
 
-![semantic-layer](/images/articles/iceberg-the-definitive-guide-ch12/semantic-layer.png =400x)
+![semantic-layer](/images/articles/iceberg-the-definitive-guide-ch12/semantic-layer.png =450x)
 *https://www.dremio.com/blog/what-is-a-semantic-layer/ より*
 
 さまざまな機能があり、セマンティックレイヤで以下のようなことを行うことが良いとされています。
