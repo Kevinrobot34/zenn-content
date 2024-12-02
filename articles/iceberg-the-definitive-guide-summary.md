@@ -117,9 +117,7 @@ https://speakerdeck.com/tanisuhi/iceberg-definitive-guidelun-du-hui-chapter9
 
 ## Part3: Apache Iceberg in Practice
 
-Part1 で Iceberg の全体像を確認し、 Part2 で具体的に Iceberg を利用する方法を確認してきました。
-最後の Part3 としては Iceberg を実践的に利用するための様々なプラクティスが紹介されています。
-このパートまで読むことで実際に Iceberg を利用していく準備がはじめやすくなるはずです。
+Part1 で Iceberg の全体像を確認し、 Part2 で具体的に Iceberg を利用する方法を確認してきました。最後の Part3 としては Iceberg を実践的に利用するための様々なプラクティスが紹介されています。このパートまで読むことで実際に Iceberg を利用していく準備がはじめやすくなるはずです。
 
 
 ### 10: Apache Iceberg in Production
@@ -142,8 +140,7 @@ https://zenn.dev/dataheroes/articles/iceberg-the-definitive-guide-ch10
 
 ### 11: Streaming with Apache Iceberg
 
-11章では Iceberg を Streaming data に対して利用する際の話がまとめられています。
-Streaming data はデータ量が多く、スキーマも変化していく可能性も高いデータですが、 Iceberg はこれらを取り扱えるように設計されているため、相性は良いわけです。
+11章では Iceberg を Streaming data に対して利用する際の話がまとめられています。Streaming data はデータ量が多く、スキーマも変化していく可能性も高いデータですが、 Iceberg はこれらを取り扱えるように設計されているため、相性は良いわけです。
 Spark や Flink 、 Kafka Connect を Streaming data に利用する方法、またその際の注意点などがまとめられています。
 
 https://zenn.dev/dataheroes/articles/iceberg-the-definitive-guide-ch11
@@ -161,9 +158,7 @@ https://zenn.dev/dataheroes/articles/iceberg-the-definitive-guide-ch12
 
 ### 13: Migrating to Apache Iceberg
 
-13章では Iceberg へマイグレーションする方法やその際の注意点についてまとめられています。
-新規のデータパイプラインやデータ基盤で Iceberg を利用する場合にはこれまでの章の情報でも十分かもしれませんが、
-既存のデータパイプラインやデータ基盤を Iceberg に移行するとなると追加で考えるべきことは増えます。
+13章では Iceberg へマイグレーションする方法やその際の注意点についてまとめられています。新規のデータパイプラインやデータ基盤で Iceberg を利用する場合にはこれまでの章の情報でも十分かもしれませんが、既存のデータパイプラインやデータ基盤を Iceberg に移行するとなると追加で考えるべきことは増えます。
 
 この章ではインプレース移行やシャドウ移行といった以降の方針や具体的な移行方法について述べられています。
 
