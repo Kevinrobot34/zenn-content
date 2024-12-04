@@ -94,7 +94,7 @@ from table(generator(rowcount => 1000000));
 create or replace table cloned_table clone original_table;
 ```
 また、 Query Profile を確認すると "CREATE TABLE" のみで、 Warehouse も使わずに実行されていることがわかります。
-![query-profile](/images/articles/snowflake-zero-copy-clone/query-profile.png =300x)
+![query-profile](/images/articles/snowflake-zero-copy-clone/query-profile.png =350x)
 *Query Profile には warehouse の名前が表示されていない*
 
 比較として直接 `original_table` を CTAS でコピーしてみましょう。こちらは Small の Warehouse で数秒程度はかかりました。
@@ -150,6 +150,15 @@ group by code order by code;
 
 ## 考慮事項
 
+ここまで見てきたようにゼロコピークローンは便利な機能なのですが、様々な考慮事項がありいくつか紹介しようと思います。
+
+詳細は以下のドキュメントをご覧ください。
+
+https://docs.snowflake.com/en/user-guide/object-clone
+
+https://docs.snowflake.com/en/user-guide/tables-storage-considerations#cloned-table-schema-and-database-storage
+
+
 ### 権限について
 
 
@@ -159,7 +168,6 @@ group by code order by code;
 DBやSchemaをクローンするとその中のすべてのオブジェクトがクローンされるが、外部テーブルと内部ステージは対象外。
 
 privacy policy とかあるとそれも対象外にもなったりするらしい(?)
-https://docs.snowflake.com/en/user-guide/object-clone
 
 
 
@@ -219,11 +227,3 @@ Snowflake のゼロコピークローンはまさに Git のブランチのよ�
 
 Snowflake のゼロコピークローンについて確認してきました。実際に使う際には細かい注意点もありますが、うまく利用できると非常に強力な機能です。是非皆さんもゼロコピークローンが使えるユースケースがないか探してみてください！
 
-
-## References
-
-https://docs.snowflake.com/en/user-guide/object-clone
-
-https://docs.snowflake.com/en/user-guide/tables-storage-considerations#cloned-table-schema-and-database-storage
-
-https://quickstarts.snowflake.com/guide/getting_started_with_snowflake/index.html#7
