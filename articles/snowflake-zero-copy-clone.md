@@ -16,11 +16,47 @@ publication_name: finatext
 ## ゼロコピークローンとは？
 
 
+### 仕組みについて
+
+Snowflake でもデータの実体（マイクロパーティション）とメタデータは分離して管理されており、マイクロパーティションはS3などのオブジェクトストレージで永続化され、メタデータは Foundation DB という Key-Value Store の DB で永続化されています。
+
+![snowflake-arch](/images/articles/snowflake-zero-copy-clone/snowflake-arch.png =500x)
+*https://www.snowflake.com/en/blog/how-foundationdb-powers-snowflake-metadata-forward/ より*
+
+
+
 ### Iceberg との類似性
 
 :::message
 ここで書くことは筆者独自の見解で、厳密に裏が取れているわけではありません。
 :::
+
+Iceberg はデータファイルとメタデータファイルを分離して管理し、メタデータファイルに適切な階層を用意しておくことで様々な便利な機能を実現可能にした OTF です。
+
+
+
+Iceberg の詳細は以下などをご覧ください。
+https://zenn.dev/dataheroes/articles/snowflake-iceberg-introduction
+
+https://zenn.dev/dataheroes/articles/iceberg-the-definitive-guide-summary
+
+このようなアーキテクチャにより、 ACID Transaction や Time travel そして Branching や Rollback といった特性・機能が実現されています。
+
+Snowflake のテーブルもこれらの特性・機能は実現されています。データの構造的にも、以下の通り類似性があります。
+
+* データとメタデータの分離
+  * Iceberg も Snowflake もされている
+* データの実体
+  * Iceberg では Parquet などのデータファイルが S3 などで永続化されており、データファイルはイミュータブルに管理される
+  * Snowflake ではマイクロパーティションが S3 などで永続化されており、マイクロパーティションはイミュータブルに管理される
+* メタデータ
+  * Iceberg では階層を持ったメタデータファイルが S3 などで永続化されている
+  * Snowflake では Foundation DB で永続化されている
+
+
+このように類似点が多いため、Icebergなアーキテクチャや仕組みを踏まえつつ、Snowflakeの裏側を想像するとしっくりくることが多いなと思っています。
+
+今回題材にしているゼロコピークローンはデータファイル（マイクロパーティション）はコピーせず、それを参照するメタデータだけ新たに作成していると考えることできます。
 
 
 
@@ -51,11 +87,11 @@ Write-Audit-Publish パターンと呼ばれるデータパイプラインの設
 * 新しいデータを含む dev ブランチのテーブルに対し品質チェックのテストを行う
 * テストが通れば dev ブランチを prod ブランチに fast-forward マージする
 
-というような手順を追うことで prod のテーブルの品質を担保するというものです。
+というような手順を追うことで prod ブランチの品質を担保するというものです。
 
 以下の通り、 Iceberg の文脈などでよく取り上げられます。
 
-![audit-branch](/images/articles/snowflake-zero-copy-clone/audit-branch.png =550x)
+![audit-branch](/images/articles/snowflake-zero-copy-clone/audit-branch.png =500x)
 *https://iceberg.apache.org/docs/latest/branching/#audit-branch より*
 
 https://speakerdeck.com/bering/apacheicebergthedefinitiveguidelun-du-hui-chapter14?slide=4
