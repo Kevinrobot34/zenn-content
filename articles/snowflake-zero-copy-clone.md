@@ -75,8 +75,7 @@ https://zenn.dev/dataheroes/articles/snowflake-iceberg-introduction
 
 ### 具体例
 
-The cloned object is writable and independent of the clone source. Therefore, changes made to either the source object or the clone object are not included in the other.
-A clone is writable and is independent of its source. Changes made to the source or clone aren’t reflected in the other object.
+クローンされたオブジェクトは書き込みが可能で、クローン元のオブジェクトとはマイクロパーティションは共有しているものの独立しています。そのため、**クローン先のオブジェクトになんらかの変更を加えてもそれはクローン元のオブジェクトには何ら影響はなく、その逆も同様です**。これを具体的に確認してみましょう。
 
 
 
@@ -141,13 +140,19 @@ Snowflake のゼロコピークローンはまさに Git のブランチのよ�
 
 ### スナップショット
 
+ゼロコピークローンをスナップショット的に使うことも可能です。過去データに対して変更が起きないようなテーブルであればゼロコピークローンでスナップショットとしてテーブルを作っておくと、ストレージを無駄に重複させずに過去の断面を保持することができるようになります。
+
+:::message
+逆にいうと、過去断面全体に対してデータの変更があるようなデータだとゼロコピークローンをしても結局最新のテーブルでは新しいマイクロパーティションが全体的に作られてしまうので、直接複製してテーブルをダンプしておくのとあまり変わらなくなってしまうかもしれません。
+:::
 
 
+## 終わりに
 
+Snowflake のゼロコピークローンについて確認してきました。実際に使う際には細かい注意点もありますが、うまく利用できると非常に強力な機能です。是非皆さんもゼロコピークローンが使えるユースケースがないか探してみてください！
 
 
 ## References
-
 
 https://docs.snowflake.com/en/user-guide/object-clone
 
