@@ -30,8 +30,7 @@ Snowflake でもデータの実体（マイクロパーティション）とメ�
 
 マイクロパーティションやその周辺、そしてゼロコピークローンについては Data Superhero である酒徳さんが以下の資料で様々な図とともに非常にわかりやすく解説してくださっています。こちらも併せてご覧ください。
 
-![introduction-of-mp](/images/articles/snowflake-zero-copy-clone/introduction-of-mp.png
- =500x)
+![introduction-of-mp](/images/articles/snowflake-zero-copy-clone/introduction-of-mp.png)
 *https://docs.google.com/presentation/d/1PabfRSyOzNaQ2Anr2Zimaio2KrYiqZidhRpsxcWfk4A/edit#slide=id.p より*
 
 
