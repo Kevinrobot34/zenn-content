@@ -137,7 +137,6 @@ select
     metadata$filename, 
     metadata$file_row_number,
 from @my_s3_stage/
-order by 1, 2
 limit 100;
 ```
 
@@ -247,6 +246,38 @@ Snowflake へデータをロードするために外部テーブルを使うこ�
   * 外部テーブルはクローンできない
 
 この辺りに気をつけた上で使うとかなり有効な機能かなと思います。
+
+
+## 注意事項
+
+### 外部テーブルのスキーマ
+
+https://docs.snowflake.com/ja/user-guide/tables-external-intro#schema-on-read で記載がある通り、外部テーブルには以下の３つの特殊な列がある。
+* `VALUE`
+  * 外部ファイルのある行のレコードを表す VARIANT 型の列
+  * 外部テーブルに対する `SELECT *` は必ず VALUE 列を含む
+  * 外部ステージに配置されたファイルの形式によって `VALUE` に含まれる列の値も変わる
+    * PARQUETの場合、カラム名が key となっている `VARIANT`
+    * CSVの場合、 `c1` などのような値が key となっている `VARIANT`
+* `METADATA$FILENAME`
+  * 外部ステージに配置されたデータファイルの名前
+  * S3の場合はオブジェクトの key が対応する
+* `METADATA$FILE_ROW_NUMBER`
+  * 外部ステージに配置されたデータファイルの各レコードの行番号
+
+
+### `dbt-external-tables` の注意
+
+* 外部ステージに配置したファイルが parquet の場合、 source の定義においてカラム名は大文字で定義しておいた方が良い
+  * 生成されるddlは以下のような形式で、 `value:row_id` として参照するが、 value 列では key が大文字になったりしていてうまく参照できなかったりすることがある。
+    ```sql
+    create or replace external table database.schema.test_external_table(
+      row_id varchar(255) as ((case when is_null_value(value:row_id) or lower(value:row_id) = 'null' then null else value:row_id end)::varchar(255)),
+    ...
+    ) partition by (by_scraping_date) 
+    location = @schema.sample_stage/test/path 
+    file_format = ( TYPE = PARQUET, COMPRESSION = SNAPPY, BINARY_AS_TEXT = FALSE)
+    ```
 
 
 ## まとめ
