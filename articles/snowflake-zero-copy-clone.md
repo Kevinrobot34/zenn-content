@@ -75,9 +75,75 @@ https://zenn.dev/dataheroes/articles/snowflake-iceberg-introduction
 もちろん実際には Snowflake のゼロコピークローンはテーブル以外の様々なオブジェクトのクローンにも対応しており、 Iceberg との類似性だけで全てを理解できるわけではないです。しかしメインのユースケースと考えられるテーブルのクローンに関しては Iceberg の知識は良い示唆を与えてくれるのではないかと考えています。
 
 
-### 具体例
+## 具体例
 
 クローンされたオブジェクトは書き込みが可能で、クローン元のオブジェクトとはマイクロパーティションは共有しているものの独立しています。そのため、**クローン先のオブジェクトになんらかの変更を加えてもそれはクローン元のオブジェクトには何ら影響はなく、その逆も同様です**。これを具体的に確認してみましょう。
+
+### Clone の実行
+まず元のテーブルを作っておきます。
+```sql
+create or replace table original_table (id int, code varchar, name varchar) as
+select seq8(), 'code-' || seq4()%2, randstr(10, random())
+from table(generator(rowcount => 1000000));
+```
+`original_table` の `code` 列は `code-0` か `code-1` のどちらかの値をとります。
+
+
+まずは `original_table` をクローンし `cloned_table` を作成しましょう。これは1秒程で完了するはずです。
+```sql
+create or replace table cloned_table clone original_table;
+```
+また、 Query Profile を確認すると "CREATE TABLE" のみで、 Warehouse も使わずに実行されていることがわかります。
+![query-profile](/images/articles/snowflake-zero-copy-clone/query-profile.png =300x)
+*Query Profile には warehouse の名前が表示されていない*
+
+比較として直接 `original_table` を CTAS でコピーしてみましょう。こちらは Small の Warehouse で数秒程度はかかりました。
+```sql
+create or replace table copied_table as (
+    select * from original_table
+);
+```
+
+### クローン元とクローン先の独立性
+
+クローン先の `cloned_table` に insert してみてそれがクローン元の `original_table` に影響がないことを確かめてみましょう。
+```sql
+insert into cloned_table(id, code, name)
+    select seq8(), 'code-2', randstr(10, random())
+    from table(generator(rowcount => 100000));
+
+select code, count(*) as count from original_table
+group by code order by code;
+-- code は `code-0` / `code-1` の２つのまま
+
+select code, count(*) as count from cloned_table
+group by code order by code;
+-- code は `code-0` / `code-1` / `code-2` の3つ
+```
+
+
+次にクローン元の `original_table` から `code-0` のレコードを削除して、それがクローン先の `cloned_table` に影響がないことも確かめてみましょう。
+```sql
+delete from original_table
+where code = 'code-0';
+
+select code, count(*) as count from original_table
+group by code order by code;
+-- code は `code-1` のみ
+
+select code, count(*) as count from cloned_table
+group by code order by code;
+-- code は `code-0` / `code-1` / `code-2` の3つのまま
+```
+
+最後に元のテーブル `original_table` 自体を削除してしまっても、それがクローン先の `cloned_table` に影響がないことも確かめてみましょう。
+```sql
+drop table original_table;
+
+select code, count(*) as count from cloned_table
+group by code order by code;
+-- code は `code-0` / `code-1` / `code-2` の3つのまま
+```
 
 
 
