@@ -19,23 +19,32 @@ Snowflake は様々な便利な機能がありますが、その一つにゼロ�
 
 ## ゼロコピークローンとは？
 
+### 概要
 
-### 仕組みに
+ゼロコピークローンとはテーブルやスキーマ、データベースといったSnowflakeの各種オブジェクトの「コピー」を作成する機能です。以下のように通常のオブジェクトのCREATE文に `CLONE <source_object_name>` を追加するだけでこの機能が利用可能です。
 
-Snowflake でもデータの実体（マイクロパーティション）とメタデータは分離して管理されており、マイクロパーティションはS3などのオブジェクトストレージで永続化され、メタデータは Foundation DB という Key-Value Store の DB で永続化されています。
+```sql
+CREATE TABLE company_metadata_dev CLONE company_metadata;
+```
+
+詳細は以下の `CREATE <object> … CLONE` 文のドキュメントをご覧ください。
+https://docs.snowflake.com/ja/sql-reference/sql/create-clone
+
+### 仕組み
+
+Snowflake ではデータの実体（マイクロパーティション）とメタデータは分離して管理されており、マイクロパーティションはS3などのオブジェクトストレージで永続化され、メタデータは Foundation DB という Key-Value Store の DB で永続化されています。
 
 ![snowflake-arch](/images/articles/snowflake-zero-copy-clone/snowflake-arch.png =500x)
 *https://www.snowflake.com/en/blog/how-foundationdb-powers-snowflake-metadata-forward/ より*
 
 あるテーブルをコピーしようとしてマイクロパーティションもメタデータも両方をコピーしようとすると時間がかかります。特にマイクロパーティションはデータの実体であり、サイズが大きいからです。
 
-そこでマイクロパーティションはコピーせず、それを参照するメタデータだけコピーして新しく用意することであたかもテーブル全体をコピーしたかのように取り扱うことができる仕組みがゼロコピークローンです。
-
-
-マイクロパーティションやその周辺、そしてゼロコピークローンについては Data Superhero である酒徳さんが以下の資料で様々な図とともに非常にわかりやすく解説してくださっています。こちらも併せてご覧ください。
+そこでマイクロパーティションはコピーせず、それを参照するメタデータだけコピーして新しく用意することであたかもテーブル全体をコピーしたかのように取り扱うことを可能にした仕組みがゼロコピークローンです。
 
 ![introduction-of-mp](/images/articles/snowflake-zero-copy-clone/introduction-of-mp.png)
 *https://docs.google.com/presentation/d/1PabfRSyOzNaQ2Anr2Zimaio2KrYiqZidhRpsxcWfk4A/edit#slide=id.p より*
+
+マイクロパーティションやその周辺、そしてゼロコピークローンについては Data Superhero である酒徳さんが上記の資料で様々な図とともに非常にわかりやすく解説してくださっています。こちらも併せて是非ご覧ください。
 
 
 ### Iceberg との類似性
@@ -64,9 +73,27 @@ https://zenn.dev/dataheroes/articles/snowflake-iceberg-introduction
 このように類似点が多いため、Icebergなアーキテクチャや仕組みを踏まえつつ、Snowflakeの裏側を想像するとしっくりくることが多いなと思っています。今回題材にしているゼロコピークローンはデータファイル（マイクロパーティション）はコピーせず、それを参照するメタデータだけ新たに作成していると考えることできます。
 
 
+### 具体例
+
+The cloned object is writable and independent of the clone source. Therefore, changes made to either the source object or the clone object are not included in the other.
+A clone is writable and is independent of its source. Changes made to the source or clone aren’t reflected in the other object.
+
+
 
 
 ## 考慮事項
+
+### 権限について
+
+
+
+### 対象オブジェクトについて
+
+DBやSchemaをクローンするとその中のすべてのオブジェクトがクローンされるが、外部テーブルと内部ステージは対象外。
+
+privacy policy とかあるとそれも対象外にもなったりするらしい(?)
+https://docs.snowflake.com/en/user-guide/object-clone
+
 
 
 
@@ -122,8 +149,8 @@ Snowflake のゼロコピークローンはまさに Git のブランチのよ�
 ## References
 
 
-https://docs.snowflake.com/en/sql-reference/sql/create-clone
 https://docs.snowflake.com/en/user-guide/object-clone
+
 https://docs.snowflake.com/en/user-guide/tables-storage-considerations#cloned-table-schema-and-database-storage
 
 https://quickstarts.snowflake.com/guide/getting_started_with_snowflake/index.html#7
