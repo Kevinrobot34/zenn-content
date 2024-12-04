@@ -3,7 +3,7 @@ title: "Snowflake のゼロコピークローン入門"
 emoji: "🐏"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "DataEngineering", "SQL"]
-published: false
+published: true
 publication_name: finatext
 ---
 
