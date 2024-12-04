@@ -1,8 +1,8 @@
 ---
-title: "Snowflake ゼロコピークローン入門"
+title: "Snowflake のゼロコピークローン入門"
 emoji: "🐏"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Snowflake", "DataEngineering", "SQL", ]
+topics: ["Snowflake", "DataEngineering", "SQL"]
 published: false
 publication_name: finatext
 ---
@@ -13,7 +13,7 @@ publication_name: finatext
 
 こんにちは！ナウキャストのデータエンジニアのけびんです。
 
-Snowflake は様々な便利な機能がありますが、その一つにゼロコピークローンがあります。 Snowflake のような DWH がデータ量が大きいことも多いとは思いますが、そのような際にデータ全体をコピーしたりするのはコストが高いオペレーションになります。これを解決するのがゼロコピークローンです。
+Snowflake は様々な便利な機能がありますが、その一つにゼロコピークローンがあります。 Snowflake のような DWH ではデータ量が大きいテーブルが多いと思いますが、こういったテーブルをコピーしたりするのはコストが高いオペレーションになります。これを解決するのがゼロコピークローンです。
 
 本ブログではゼロコピークローンに関する概要を説明し、利用時の注意点と具体的なユースケースを紹介していきます。
 
@@ -22,7 +22,7 @@ Snowflake は様々な便利な機能がありますが、その一つにゼロ�
 
 ### 概要
 
-ゼロコピークローンとはテーブルやスキーマ、データベースといったSnowflakeの各種オブジェクトの「コピー」を作成する機能です。以下のように通常のオブジェクトのCREATE文に `CLONE <source_object_name>` を追加するだけでこの機能が利用可能です。
+ゼロコピークローンとはテーブルやスキーマ、データベースといったSnowflakeの各種オブジェクトの「コピー」を作成する機能です。以下のように通常のオブジェクトのCREATE文に `CLONE <source_object_name>` を追加するだけでこの機能が利用できます。
 
 ```sql
 CREATE TABLE company_metadata_dev CLONE company_metadata;
@@ -33,7 +33,7 @@ https://docs.snowflake.com/ja/sql-reference/sql/create-clone
 
 ### 仕組み
 
-Snowflake ではデータの実体（マイクロパーティション）とメタデータは分離して管理されており、マイクロパーティションはS3などのオブジェクトストレージで永続化され、メタデータは Foundation DB という Key-Value Store の DB で永続化されています。
+Snowflake ではデータの実体（マイクロパーティション）とメタデータは分離して管理されており、マイクロパーティションはS3などのオブジェクトストレージで永続化され、メタデータは Foundation DB という Key-Value Store で永続化されています。
 
 ![snowflake-arch](/images/articles/snowflake-zero-copy-clone/snowflake-arch.png =500x)
 *https://www.snowflake.com/en/blog/how-foundationdb-powers-snowflake-metadata-forward/ より*
@@ -71,7 +71,7 @@ https://zenn.dev/dataheroes/articles/snowflake-iceberg-introduction
   * Snowflake では Foundation DB で永続化されている
 
 
-このように類似点が多いため、Icebergなアーキテクチャや仕組みを踏まえつつ、Snowflakeの裏側を想像するとしっくりくることが多いなと思っています。今回題材にしているゼロコピークローンはデータファイル（マイクロパーティション）はコピーせず、それを参照するメタデータだけ新たに作成していると考えることできます。
+このように類似点が多いため、Icebergのアーキテクチャや仕組みを踏まえつつ、Snowflakeの裏側を想像するとしっくりくることが多いなと思っています。今回題材にしているゼロコピークローンはデータファイル（マイクロパーティション）はコピーせず、それを参照するメタデータだけ新たに作成していると考えることできます。
 
 もちろん実際には Snowflake のゼロコピークローンはテーブル以外の様々なオブジェクトのクローンにも対応しており、 Iceberg との類似性だけで全てを理解できるわけではないです。しかしメインのユースケースと考えられるテーブルのクローンに関しては Iceberg の知識は良い示唆を与えてくれるのではないかと考えています。
 
