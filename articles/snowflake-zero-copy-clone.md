@@ -53,11 +53,11 @@ Snowflake ではデータの実体（マイクロパーティション）とメ�
 ここで書くことは筆者独自の見解で、厳密に裏が取れている（公式ドキュメントなどに記載がある）わけではありません。
 :::
 
-Iceberg はデータファイルとメタデータファイルを分離して管理し、メタデータファイルに適切な階層を用意しておくことで様々な便利な機能を実現可能にした OTF です。
-
-
-Iceberg の詳細は以下などをご覧ください。
+Iceberg はデータファイルとメタデータファイルを分離して管理し、メタデータファイルに適切な階層を用意しておくことで様々な便利な機能を実現可能にした OTF です。Iceberg 自体の詳細は以下などをご覧ください。
 https://zenn.dev/dataheroes/articles/snowflake-iceberg-introduction
+
+![iceberg-metadata](/images/articles/snowflake-zero-copy-clone/iceberg-metadata.png =500x)
+*https://iceberg.apache.org/spec/#overview より*
 
 このようなアーキテクチャにより、 ACID Transaction や Time travel そして Branching や Rollback といった特性・機能が実現されています。Snowflake のテーブルもこれらの特性・機能は実現されています。データの構造的にも、以下の通り類似性があります。
 
