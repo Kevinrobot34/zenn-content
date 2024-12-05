@@ -33,7 +33,7 @@ https://docs.snowflake.com/ja/sql-reference/sql/create-clone
 
 ### 仕組み
 
-Snowflake ではデータの実体（マイクロパーティション）とメタデータは分離して管理されており、マイクロパーティションはS3などのオブジェクトストレージで永続化され、メタデータは Foundation DB という Key-Value Store で永続化されています。
+Snowflake ではデータの実体（マイクロパーティション）とメタデータは分離して管理されており、マイクロパーティションはS3などのオブジェクトストレージで永続化され、メタデータは Foundation DB という Key-Value Store で永続化されています。またこのマイクロパーティションは**イミュータブル**に管理されています。
 
 ![snowflake-arch](/images/articles/snowflake-zero-copy-clone/snowflake-arch.png =500x)
 *https://www.snowflake.com/en/blog/how-foundationdb-powers-snowflake-metadata-forward/ より*
@@ -41,6 +41,13 @@ Snowflake ではデータの実体（マイクロパーティション）とメ�
 あるテーブルをコピーしようとしてマイクロパーティションもメタデータも両方をコピーしようとすると時間がかかります。特にマイクロパーティションはデータの実体であり、サイズが大きいからです。
 
 そこでマイクロパーティションはコピーせず、それを参照するメタデータだけコピーして新しく用意することであたかもテーブル全体をコピーしたかのように取り扱うことを可能にした仕組みがゼロコピークローンです。
+
+具体的に書くと、
+* クローン直後は、元テーブルもクローン先のテーブルもメタデータだけが別で、マイクロパーティションは同じものを参照した状態
+* クローン元で変更があった場合、元のマイクロパーティションは変更されず、新しくマイクロパーティションは作られ、メタデータもこれを参照するようにクローン元のテーブルでのみ独立に変更される
+  * クローン先のテーブルであっても同様
+
+というような形です。
 
 ![introduction-of-mp](/images/articles/snowflake-zero-copy-clone/introduction-of-mp.png)
 *https://docs.google.com/presentation/d/1PabfRSyOzNaQ2Anr2Zimaio2KrYiqZidhRpsxcWfk4A/edit#slide=id.p より*
@@ -189,7 +196,7 @@ Prod 運用しているテーブルに何か変更を加えたい時に、まず
 ### WAP パターン
 
 Write-Audit-Publish パターンと呼ばれるデータパイプラインの設計手法があります。
-端的にいうと git ライクにデータを取り扱い、
+端的にいうと Git ライクにデータを取り扱い、
 
 * prod から dev ブランチを作る
 * 新しいデータは dev ブランチに書き込む
