@@ -22,18 +22,21 @@ dbt を利用すると ELT パイプラインを宣言的に作成・管理す�
 
 https://docs.getdbt.com/docs/build/incremental-models-overview
 
-https://docs.getdbt.com/best-practices/materializations/1-guide-overview
-
 incremental model は非常に便利なのですが、 table の materialization に比べ複雑で難しいです。本ブログでは incremental model をパフォーマンスよく実装するためのプラクティスや考え方を紹介します。
 
 
 ## 適切な Partitioning
 
-incremental model はいわゆる差分更新をするための仕組みです。 incremental model を利用するデータに対して適切に「差分」を定義し、それをフィルタリングできるようにテーブルを構成しておいてあげることが大事です。
-例えば、ある巨大なテーブルに row_id という UUID のユニークな列があったとして、これをkeyにして差分更新しようとすると、差分を特定するために毎回テーブルのフルスキャンをする必要があったりします。
-なんらかの日付のような適切なパーティションを探してそれを利用して incremental model を使ってみるのが大事です。
-peiさんの以下の記事が非常にわかりやすくこの辺りの話を書いてくれているので是非読んでみてください。
+incremental model のイメージとしては、以下の図のように、ソーステーブルから差分に該当するレコードだけ抽出してきて、それを既存のモデルに追加・更新する、というものです。
 
+![incremental-diagram](/images/articles/dbt-high-performance-incremental-model/incremental-diagram.png =500x)
+*https://docs.getdbt.com/best-practices/materializations/4-incremental-models より*
+
+incremental model のパフォーマンスを高めるにはこの差分に該当するレコードをソーステーブルから抽出するところを効率的に行えるような構成にしておくことが重要になります。例えば、ある巨大なテーブルに `row_id` という UUID の列があったとして、これをkeyにして差分更新するように設定したとしましょう。この `row_id` 列はテーブル全体でユニークになっており、差分を特定するために毎回テーブルのフルスキャンをする必要が出てしまいます。これでは差分を抽出する操作が非効率で、テーブルが大きくなるにつれかかる時間も増えてしまいます。
+
+実際には、日付など差分を特定するために利用できる適切な列があることが多いでしょう。この列を利用してソーステーブルを partitioning しておくことで、ソーステーブルから差分を抽出する際に partition pruning が利用できるようになると、フルスキャンを回避できます。このように incremental model の実装をするというのはパーティションの設計をする、というのとほぼ同義なのです。
+
+peiさんの以下の記事でこの辺りの話が非常にわかりやすく解説されているので是非読んでみてください。
 https://zenn.dev/pei0804/articles/data-partitioning-in-dbt
 
 
