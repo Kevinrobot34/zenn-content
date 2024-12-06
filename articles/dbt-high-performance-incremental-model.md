@@ -1,5 +1,5 @@
 ---
-title: "ハイパフォーマンス dbt incremental model"
+title: "dbt incremental model で大規模データを取り扱うプラクティス"
 emoji: "🤖"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["dbt", "DataEngineering", "SQL", "Snowflake"]
@@ -87,16 +87,49 @@ https://docs.getdbt.com/reference/commands/run#the---empty-flag
 
 ## incremental_predicates
 
-`incremental_predicates` という config をご存知でしょうか？ config でこちらを設定しておくと、incremental model の各ステップのクエリで設定したsqlのステートメントが where 句に追加されるというものです。
+`incremental_predicates` という config をご存知でしょうか？ config でこちらを設定しておくと、incremental model の各ステップのクエリで設定したsqlのステートメントが追加されるというものです。
 
 https://docs.getdbt.com/docs/build/incremental-strategy#about-incremental_predicates
 
+```sql
+-- in models/my_incremental_model.sql
 
-`incremental_predicates` を適切に使うと、各ステップでフィルタリングの条件を明示され partition pruning を確実に効かせる、といったことが可能になり、 dbt incremental model のパフォーマンス向上に利用できるでしょう。
+{{
+  config(
+    materialized = 'incremental',
+    unique_key = 'id',
+    cluster_by = ['session_start'],  
+    incremental_strategy = 'merge',
+    incremental_predicates = [
+      "DBT_INTERNAL_DEST.session_start > dateadd(day, -7, current_date)"
+    ]
+  )
+}}
+...
+```
+と `incremental_predicates` を config で指定しておくと、以下のように明示的に絞り込むための条件が追加されるようになります。
+```sql
+merge into <existing_table> DBT_INTERNAL_DEST
+    from <temp_table_with_new_records> DBT_INTERNAL_SOURCE
+    on
+        -- unique key
+        DBT_INTERNAL_DEST.id = DBT_INTERNAL_SOURCE.id
+        and
+        -- custom predicate: limits data scan in the "old" data / existing table
+        DBT_INTERNAL_DEST.session_start > dateadd(day, -7, current_date)
+    when matched then update ...
+    when not matched then insert ...
+```
 
-今時のDWHは少ない where の条件からもよしなに最適化をしてくれることが多いですが、条件を明示することで確実に最適化を促すことが可能になるというイメージです。
+このように `incremental_predicates` を適切に使うと、各ステップでフィルタリングの条件を明示され partition pruning を確実に効かせる、といったことが可能になりパフォーマンス向上に利用できるでしょう。特に UUID のようなカーディなリティの高い列での突合が必要な場合に、追加で明示的な条件を追加することで高速化が見込めます。
 
-前節の `dbt run --empty` による事前のクエリ生成と組み合わせて、最適化が実際にできているかを確認しながらの利用がおすすめです。
+今時のDWHは少ない where の条件からもよしなに最適化をしてくれることが多いですが、条件を明示することで確実に最適化を促すことが可能になるというイメージです。前節の `dbt run --empty` による事前のクエリ生成と組み合わせて、最適化が実際にできているかを確認しながらの利用がおすすめです。
+
+:::message
+現在の実装では `incremental_predicates` で直接 `ref` などを書き込むことはできないようです。そのため動的な条件にするためには以下のIssueにあるような工夫が必要となるのでこの点は注意が必要です。この辺りは今後使い勝手が良くなっていくことに期待しています。
+https://github.com/dbt-labs/dbt-core/issues/6658
+:::
+
 
 
 ## まとめ
