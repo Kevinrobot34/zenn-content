@@ -86,11 +86,26 @@ https://docs.getdbt.com/reference/commands/run#the---empty-flag
 
 
 ## incremental_predicates
+
+`incremental_predicates` という config をご存知でしょうか？ config でこちらを設定しておくと、incremental model の各ステップのクエリで設定したsqlのステートメントが where 句に追加されるというものです。
+
 https://docs.getdbt.com/docs/build/incremental-strategy#about-incremental_predicates
 
 
+`incremental_predicates` を適切に使うと、各ステップでフィルタリングの条件を明示され partition pruning を確実に効かせる、といったことが可能になり、 dbt incremental model のパフォーマンス向上に利用できるでしょう。
 
-## References
-https://docs.getdbt.com/best-practices/materializations/1-guide-overview
+今時のDWHは少ない where の条件からもよしなに最適化をしてくれることが多いですが、条件を明示することで確実に最適化を促すことが可能になるというイメージです。
 
+前節の `dbt run --empty` による事前のクエリ生成と組み合わせて、最適化が実際にできているかを確認しながらの利用がおすすめです。
+
+
+## まとめ
+
+dbt で大規模なデータを取り扱うためには必須の incremental model のプラクティスについて紹介してきました。
+
+* partitioning を適切に行い効率的に差分を取り扱えるようにすることが大事
+* コンパイル後の実際に実行されるクエリと向き合い、それを効率化するためにどのようにモデルやそのconfigを書き換えるべきかを考えることが大事
+* `incremental_predicates` なども利用するとさらに最適化が可能かも
+
+皆さんも incremental model に関する工夫があればぜひ教えてください！
 
