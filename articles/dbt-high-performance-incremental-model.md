@@ -40,34 +40,38 @@ https://zenn.dev/pei0804/articles/data-partitioning-in-dbt
 ## コンパイル後のクエリと向き合う
 
 dbt incremental model は差分更新をするために、複数のクエリを実行することがあります。例えば incremental strategy として delete+insert を選択すると
-CTAS: 差分データに対応する一時テーブルを作成
-DELETE: 差分テーブルと元テーブルを突き合わせ delete を実行
-INSERT: 差分テーブルを元テーブルに insert
+* CTAS: 差分データに対応する一時テーブルを作成
+* DELETE: 差分テーブルと元テーブルを突き合わせ delete を実行
+* INSERT: 差分テーブルを元テーブルに insert
 と３つのクエリが実行されます。
 この場合、１つ目のCTASは比較的モデルファイルのクエリがそのままな形ですが、２つ目のDELETEと３つ目のINSERTはモデルファイルのconfigからよしなに生成されています。
 これらのクエリが予期せぬ高コストなものになっていることがあったりします。
 
-これらを踏まえ、dbt incremental model はどのようなクエリを生成しているのかを確認し、またそのクエリの効率が悪くないか実際に確かめることが非常に重要になってきます。
-
-自分は以前、dbt-snowflakeで delete+insert の incremental model を作成した際に、 ２つ目のDELETEのクエリで exploding join となってしまっておりものすごく時間がかかるモデルになってしまっていた、という経験をしました。詳細は以下をご覧ください。
+これらを踏まえ、dbt incremental model はどのようなクエリを生成しているのかを確認し、またそのクエリの効率が悪くないか実際に確かめることが非常に重要です。自分は以前、dbt-snowflakeで delete+insert の incremental model を作成した際に、 ２つ目のDELETEのクエリで exploding join となってしまっておりものすごく時間がかかるモデルになってしまっていた、という経験をしました。詳細は以下をご覧ください。
 https://techblog.finatext.com/dbt-snowflake-incremental-exploding-joins-7ca8a6b484ca
 
 :::message
-「コンパイル後のクエリと向き合う」という姿勢は incremental model 以外でも、dbtを利用している時に全般的に持っておくことが大事です。例えば dbt test は便利な機能ですが、実際に実行されているクエリがどのようなものか見たことあるでしょうか？設定によっては意味のないテストになっていたり、非効率なものになっていたりすることも見かけます。是非チェックしてみましょう。
+「コンパイル後のクエリと向き合う」という姿勢は incremental model 以外でも、dbtを利用時には常に持っておくことが大事だと考えています。例えば dbt test は便利な機能ですが、実際に実行されているクエリがどのようなものか見たことあるでしょうか？設定によっては意味のないテストになっていたり、非効率なものになっていたりすることも見かけます。是非チェックしてみましょう。
 :::
 
+コンパイル後の実際に実行しているクエリと向き合うことが重要なのは分かったとして、どのようにコンパイル後のクエリを確認するのが良いでしょうか？いくつかパターンがあるかなと思うので紹介します。
 
-### コンパイル後のクエリの生成方法
 
-コンパイル後の実際に実行しているクエリと向き合うことが重要なのは分かったとして、どのようにコンパイル後のクエリを確認するのかという話が出てきます。
+### 実行履歴を確認する
 
-一番シンプルなのはクエリの実行履歴を確認し、 run や build が実行したクエリを DWH 側で確認する、という方法です。既に incremental model を運用している場合などではまずこれをやって見るのが良いでしょう。例えば Snowflake であれば Query History から Query Profile を確認し、非効率になっているクエリがないかを確認することが大事です。
+一番シンプルなのはクエリの実行履歴を確認し、 run や build で実行されたクエリを DWH 側で直接確認する、という方法です。既に incremental model を運用している場合などではまずこれをやって見るのが良いでしょう。例えば Snowflake であれば Query History から Query Profile を確認し、非効率になっているクエリがないかを確認することが大事です。
+
 また Snowflake であれば SELECT などのツールを利用すると dbt のモデルごとに Query History の情報をまとめて表示してくれるため非常に便利です。
 
-
 ![select-sample](/images/articles/dbt-high-performance-incremental-model/select-sample.png =500x)
+*SELECTでdbtのintegrationの設定をした時の画面。詳細は https://select.dev/docs/dbt*
 
+弊社の六車がSELECTについて紹介している記事もあるのでぜひご覧ください。
 https://findy-tools.io/products/select/385/333
+
+
+### クエリを生成する
+
 
 
 ## incremental_predicates
