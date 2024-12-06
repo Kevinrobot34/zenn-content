@@ -1,5 +1,5 @@
 ---
-title: "dbt incremental model で大規模データを取り扱うプラクティス"
+title: "dbt incremental model で大規模データを取り扱うTips"
 emoji: "🤖"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["dbt", "DataEngineering", "SQL", "Snowflake"]
