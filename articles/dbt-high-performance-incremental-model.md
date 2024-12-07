@@ -80,9 +80,16 @@ https://findy-tools.io/products/select/385/333
 
 事前にクエリを生成するとなるとまず先に浮かぶのは `dbt compile` でコンパイルしたクエリを確認するという方法でしょう。ただ、この方法は incremental model との相性が悪く、複数クエリからなる場合も最初に実行するクエリのみがコンパイルされそれしか確認できません。
 
-そのため、複数ステップのクエリ全てを確認したい場合は `dbt run --empty` で empty flag を利用するのが良いと考えています。 empty flag は `limit 0` や `where false` などをよしなに差し込んで実行してくれるモードです。これによって既存のテーブルに影響を与えたり、重いクエリを実際に回したりせず、コンパイル後のクエリを確認することができます。
+そのため、複数ステップのクエリ全てを確認したい場合は `dbt run --empty` で empty flag を利用するのが良いと考えています。 empty flag は `limit 0` や `where false` などをよしなに差し込んで実行してくれるモードです。重いクエリを実際に回したりせず、コンパイル後のクエリを確認することができます。
 
 https://docs.getdbt.com/reference/commands/run#the---empty-flag
+
+:::message
+以下の点には注意してください。
+* `--empty` flag は dbt 1.8 からの機能です
+* `dbt run --empty` は `limit 0` などを入れて**実際にクエリが実行される**ことに注意してください。例えば既存の `materialized="table"` のモデルや既存の incremental model に対して full-refresh も指定した場合にはテーブルが0行のもので上書きされてしまいます。 dev 環境での利用がおすすめです。
+:::
+
 
 
 ## incremental_predicates
@@ -121,7 +128,7 @@ merge into <existing_table> DBT_INTERNAL_DEST
     when not matched then insert ...
 ```
 
-このように `incremental_predicates` を適切に使うと、各ステップでフィルタリングの条件を明示され partition pruning を確実に効かせる、といったことが可能になりパフォーマンス向上に利用できるでしょう。特に UUID のようなカーディなリティの高い列での突合が必要な場合に、追加で明示的な条件を追加することで高速化が見込めます。
+このように `incremental_predicates` を適切に使うと、各ステップでフィルタリングの条件を明示され partition pruning を確実に効かせる、といったことが可能になりパフォーマンス向上に利用できるでしょう。特に UUID のようなカーディナリティの高い列での突合が必要な場合に、追加で明示的な条件を追加することで高速化が見込めます。
 
 今時のDWHは少ない where の条件からもよしなに最適化をしてくれることが多いですが、条件を明示することで確実に最適化を促すことが可能になるというイメージです。前節の `dbt run --empty` による事前のクエリ生成と組み合わせて、最適化が実際にできているかを確認しながらの利用がおすすめです。
 
