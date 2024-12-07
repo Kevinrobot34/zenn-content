@@ -3,7 +3,8 @@ title: "dbt incremental model で大規模データを取り扱うTips"
 emoji: "🐘"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["dbt", "DataEngineering", "SQL", "Snowflake"]
-published: false
+published: true
+published_at: 2024-12-08 08:00
 publication_name: finatext
 ---
 
