@@ -94,16 +94,40 @@ Hash-Hash Join (もしくは Hash-Partitioning Hash Join) は大規模なデー�
 
 ### Join の最適化のポイント
 
-Broadcast Join と Hash-Hash Join の性質を考えると、
+今までの話を踏まえると分かりやすいかと思いますが、 Join を最適化するためには以下の２つのポイントについて適切に設定することが重要になります。
 
 * Join Order
+  * 関係代数としての結合の演算は順序を入れ替えても最終結果は変わらないです
+  * しかし例えば Hash Join の結合の処理は Build 側と Probe 側とで非対称なため、順序を変えることでパフォーマンスに大きな影響があり得ます
 * Join Method
+  * Join のアルゴリズムはどれを使っても最終結果は変わらないです
+  * しかしどの方法が最適かは対象のテーブルのサイズやフィルター条件など、さまざまな要因によって変わり得ます
 
 https://en.wikipedia.org/wiki/Join_(SQL)#Implementation
 
 
 
 ## Snowflake の Adaptive Join Decisions
+
+多くのシステムではコンパイル時に Join の順序や方法を決定するのに対し、 Snowflake はクエリ実行時に適当的にこれを決定するアプローチが取られており、　"Adaptive Join Decisions" として冒頭の記事で紹介されています。
+
+これにより、 Join の入力に関するメタデータが不足している場合でも、クエリ実行時の情報も踏まえハッシュテーブルのサイズをより正確に推定が可能になり、最適な Join 戦略の決定につながります。
+
+* probe-side annotated join decision-making
+  * 実行時に計算されたビルド側のサイズ推定値と、コンパイル時に得られるプローブ側の注釈情報を組み合わせ join に関する決定を行う仕組み
+  * これにより、ビルド側が大きくプローブ側が小さい時に発生しがちな、コストの高い Broadcast Join を避けることができるようになります
+* Right-deep join trees / Coordinated join decisions
+  * OLAP では単一の大きい fact テーブルに対し、複数の dim テーブルを結合していくというユースケースがよくあり、このような場合には右に深くなるような Join Tree となるように結合処理を行っていくのが良いとされています
+  * これにより中間テーブルを保存することを避け、前の結合処理の結果をそのまま次でも利用することができ、高速になります
+  * またこの複数の join の中でどれで Broadcast Join を利用しどれで Hash-Hash Join を利用すべきかも動的に判断し決定するようになっています
+    ![sample-join-tree](/images/articles/snowflake-join-strategy/sample-join-tree.png =500x)
+    *https://www.snowflake.com/engineering-blog/query-acceleration-smarter-join-decisions/ より*
+
+
+
+これらのアプローチにより、Snowflakeはデータサイズや特性に動的に適応する効率的なクエリ処理を実現しているようです。
+
+
 
 
 
