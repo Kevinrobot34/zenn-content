@@ -102,6 +102,10 @@ Hash-Hash Join (もしくは Hash-Partitioning Hash Join) は大規模なデー�
 * Join Method
   * Join のアルゴリズムはどれを使っても最終結果は変わらないです
   * しかしどの方法が最適かは対象のテーブルのサイズやフィルター条件など、さまざまな要因によって変わり得ます
+  * 例えば以下のように Build 側のテーブルのサイズによって Broadcast Join が良いか Hash-Hash Join が良いかは変わります
+    ![snowflake-join-comparison](/images/articles/snowflake-join-strategy/snowflake-join-comparison.png)
+    *https://www.snowflake.com/engineering-blog/query-acceleration-smarter-join-decisions/ より*
+
 
 https://en.wikipedia.org/wiki/Join_(SQL)#Implementation
 
@@ -111,6 +115,7 @@ https://en.wikipedia.org/wiki/Join_(SQL)#Implementation
 
 多くのシステムではコンパイル時に Join の順序や方法を決定するのに対し、 Snowflake はクエリ実行時に適当的にこれを決定するアプローチが取られており、　"Adaptive Join Decisions" として冒頭の記事で紹介されています。
 
+要はコンパイル時には得られない情報を適切に利用することで
 これにより、 Join の入力に関するメタデータが不足している場合でも、クエリ実行時の情報も踏まえハッシュテーブルのサイズをより正確に推定が可能になり、最適な Join 戦略の決定につながります。
 
 * probe-side annotated join decision-making
