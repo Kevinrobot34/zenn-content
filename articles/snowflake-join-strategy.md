@@ -29,8 +29,7 @@ https://zenn.dev/loglass/articles/84f15be9a4d2c9
 
 ### Nested Loop
 
-単純に二重ループを回して結合する方法です。テーブルAの各レコードをテーブルBの全レコードと比較して条件に一致するものを探すというようなナイーブな方法で、コストは二つのテーブルのレコード数の**積**に比例します。
-検索するテーブルBにindexがあると速くなったりします。
+単純に二重ループを回して結合する方法です。テーブルAの各レコードをテーブルBの全レコードと比較して条件に一致するものを探すというようなナイーブな方法で、コストは二つのテーブルのレコード数の**積**に比例します。検索するテーブルBにindexがあると速くなったりします。
 
 https://en.wikipedia.org/wiki/Nested_loop_join
 
@@ -54,7 +53,7 @@ Hash Join は前の２つとは少し異なるアプローチで結合を行い�
   * ハッシュテーブル構築後、もう一方のテーブルをスキャンし、ハッシュテーブルからビルド側の対応する行を探す
     * こちらのテーブルはプローブ側と言ったりする
 
-この方法はテーブルがソート済みかに関係なく、コストは２つのテーブルのレコード数の和に比例します。
+この方法はテーブルがソート済みかに関係なく、コストは２つのテーブルのレコード数の**和**に比例します。
 
 https://en.wikipedia.org/wiki/Hash_join
 
@@ -69,9 +68,7 @@ https://en.wikipedia.org/wiki/Hash_join
 * 対象とするデータサイズがかなり大きい
 * 複数Nodeで並列分散処理を行う
 
-といったポイントがあるでしょう。
-
-Snowflake では大規模なデータに対するクエリが多いため、 Hash Join が利用されることが多いはずですが、その Hash Join にも Broadcast Join と Hash-Hash Join の２つの方法が用意されています。
+といったポイントがあるでしょう。Snowflake では大規模なデータに対するクエリが多いため、 Hash Join が利用されることが多いはずですが、その Hash Join にも Broadcast Join と Hash-Hash Join の２つの方法が用意されています。
 
 
 ### Broadcast Join
@@ -96,6 +93,8 @@ Hash-Hash Join (もしくは Hash-Partitioning Hash Join) は大規模なデー�
 
 
 ### Join の最適化のポイント
+
+Broadcast Join と Hash-Hash Join の性質を考えると、
 
 * Join Order
 * Join Method
