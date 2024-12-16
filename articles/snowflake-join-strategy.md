@@ -3,7 +3,7 @@ title: "Snowflake の Adaptive Join Decisions"
 emoji: "🌳"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "SQL", "DataEngineering"]
-published: false
+published: true
 publication_name: finatext
 ---
 
