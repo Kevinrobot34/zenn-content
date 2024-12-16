@@ -81,13 +81,13 @@ Snowflake では大規模なデータに対するクエリが多いため、 Has
 ### Broadcast Join
 
 
-![snowflake-join-broadcast](/images/articles/snowflake-join-strategy/snowflake-join-broadcast.png =500x)
+![snowflake-join-broadcast](/images/articles/snowflake-join-strategy/snowflake-join-broadcast.png)
 *https://www.snowflake.com/engineering-blog/query-acceleration-smarter-join-decisions/ より*
 
 
 ### Hash-Hash Join
 
-![snowflake-join-hashhash](/images/articles/snowflake-join-strategy/snowflake-join-hashhash.png =500x)
+![snowflake-join-hashhash](/images/articles/snowflake-join-strategy/snowflake-join-hashhash.png)
 *https://www.snowflake.com/engineering-blog/query-acceleration-smarter-join-decisions/ より*
 
 
