@@ -80,6 +80,9 @@ Snowflake では大規模なデータに対するクエリが多いため、 Has
 
 ### Broadcast Join
 
+Broadcast Join は Build フェーズで構築したハッシュテーブルを全てのワーカーノードに配っておき、各ノードで Probe フェーズの突合を行なっていく、という方法です。
+
+ビルド側のテーブルが大きい場合には各ノードにハッシュテーブルを配る部分がオーバーヘッドになったりメモリに乗り切らずにパフォーマンスが出ないということがありえますが、ビルド側のテーブルが小さい場合には並列分散処理の恩恵を受けやすいです。
 
 ![snowflake-join-broadcast](/images/articles/snowflake-join-strategy/snowflake-join-broadcast.png)
 *https://www.snowflake.com/engineering-blog/query-acceleration-smarter-join-decisions/ より*
@@ -87,12 +90,16 @@ Snowflake では大規模なデータに対するクエリが多いため、 Has
 
 ### Hash-Hash Join
 
+Hash-Hash Join (もしくは Hash-Partitioning Hash Join) は大規模なデータに適した方法です。まず最初に Build 側も Probe 側もハッシュ関数を利用してパーティショニングしておきます。それぞれ対応する一部のパーティションをワーカーノードに配置し、その中で Hash Join を行う、というようなイメージです。
+
+このようにハッシュ関数によってうまくデータを細かく分割しそれを上手く配布することで並列分散処理の恩恵を大規模データに対する Join でも得られるようにしています。
+
 ![snowflake-join-hashhash](/images/articles/snowflake-join-strategy/snowflake-join-hashhash.png)
 *https://www.snowflake.com/engineering-blog/query-acceleration-smarter-join-decisions/ より*
 
 
 
-## Join の最適化のポイント
+### Join の最適化のポイント
 
 * Join Order
 * Join Method
