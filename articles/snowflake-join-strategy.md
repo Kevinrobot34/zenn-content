@@ -113,14 +113,10 @@ https://en.wikipedia.org/wiki/Join_(SQL)#Implementation
 
 ## Snowflake の Adaptive Join Decisions
 
-多くのシステムではコンパイル時に Join の順序や方法を決定するのに対し、 Snowflake はクエリ実行時に適当的にこれを決定するアプローチが取られており、　"Adaptive Join Decisions" として冒頭の記事で紹介されています。
+多くのシステムではコンパイル時に Join の順序や方法を決定するのに対し、 Snowflake はクエリ実行時に適当的にこれを決定するアプローチが取られており、　"Adaptive Join Decisions" として冒頭の記事で紹介されています。要はコンパイル時には得られない情報を適切に利用することで、 Join に関する決定をより最適なものにしようというイメージです。
 
-要はコンパイル時には得られない情報を適切に利用することで
-これにより、 Join の入力に関するメタデータが不足している場合でも、クエリ実行時の情報も踏まえハッシュテーブルのサイズをより正確に推定が可能になり、最適な Join 戦略の決定につながります。
+おそらく "Adaptive Join Decisions" の中でもさまざまな工夫があるはずですが、この記事では "probe-side annotated join decision-making" という改善について触れられています。具体的には、 runtime 実行時のビルド側テーブルのサイズ推定と、プローブ側のコンパイル時のアノテーション情報を組み合わせるというものです。これにより高コストな Broadcast Join を避けられるようになった、という以下の事例が紹介されています。
 
-* probe-side annotated join decision-making
-  * 実行時に計算されたビルド側のサイズ推定値と、コンパイル時に得られるプローブ側の注釈情報を組み合わせ join に関する決定を行う仕組み
-  * これにより、ビルド側が大きくプローブ側が小さい時に発生しがちな、コストの高い Broadcast Join を避けることができるようになります
 * Right-deep join trees / Coordinated join decisions
   * OLAP では単一の大きい fact テーブルに対し、複数の dim テーブルを結合していくというユースケースがよくあり、このような場合には右に深くなるような Join Tree となるように結合処理を行っていくのが良いとされています
   * これにより中間テーブルを保存することを避け、前の結合処理の結果をそのまま次でも利用することができ、高速になります
@@ -128,13 +124,9 @@ https://en.wikipedia.org/wiki/Join_(SQL)#Implementation
     ![sample-join-tree](/images/articles/snowflake-join-strategy/sample-join-tree.png =500x)
     *https://www.snowflake.com/engineering-blog/query-acceleration-smarter-join-decisions/ より*
 
-
-
-これらのアプローチにより、Snowflakeはデータサイズや特性に動的に適応する効率的なクエリ処理を実現しているようです。
-
-
-
+このようにコンパイル時ではなく、クエリ実行時の情報を踏まえた adaptive なアプローチにより、Snowflakeはデータサイズや特性に動的に適応する効率的なクエリ処理を実現しているようです。
 
 
 ## まとめ
 
+Snowflake が 9.5% ものパフォーマンスの向上の立役者である "Adaptive Join Decisions" について見てきました。これ自体は勝手に適用されて我々 Snowflake ユーザーはその恩恵にあずかれるので非常にありがたいですね。またこの内容を理解しておくことで、自分のクエリを直接改善するためのヒントも得られる部分はあるのではないかと思っています。何らかの形で最適化のヒントにつながらないか、ぜひ考えてみてください！
