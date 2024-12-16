@@ -18,10 +18,6 @@ https://www.snowflake.com/engineering-blog/query-acceleration-smarter-join-decis
 
 これが面白かったので、本記事ではこれについて解説しようと思います。Join の仕方について解像度高く理解しておくと、データエンジニアらがクエリの最適化する際にも役立つはずです！
 
-:::message
-自分もこの領域の専門家というわけではないので、間違いがあれば指摘していただけると幸いです。
-:::
-
 
 
 ## RDB における Join の方法
@@ -41,7 +37,7 @@ https://en.wikipedia.org/wiki/Nested_loop_join
 
 ### Sort Merge
 
-２つのテーブルを事前にソートしておくことで、Nested Loop よりも計算量を削減をしているのが Sort Merge です。事前にソートしておくことで、２つのテーブルのレコードを上から順番に捜査し、 Join を行います。事前にソート済みであれば、このコストは二つのテーブルのレコード数の和に比例します。
+２つのテーブルを事前にソートしておくことで、Nested Loop よりも計算量を削減をしているのが Sort Merge です。事前にソートしておくことで、２つのテーブルのレコードを上から順番に捜査し、 Join を行います。事前にソート済みであれば、このコストは二つのテーブルのレコード数の**和**に比例します。
 
 https://en.wikipedia.org/wiki/Sort-merge_join
 
