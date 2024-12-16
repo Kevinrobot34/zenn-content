@@ -68,7 +68,7 @@ https://en.wikipedia.org/wiki/Hash_join
 * 対象とするデータサイズがかなり大きい
 * 複数Nodeで並列分散処理を行う
 
-といったポイントがあるでしょう。Snowflake では大規模なデータに対するクエリが多いため、 Hash Join が利用されることが多いはずですが、その Hash Join にも Broadcast Join と Hash-Hash Join の２つの方法が用意されています。
+といったポイントがあるでしょう。Snowflake の Hash Join では Broadcast Join と Hash-Hash Join の２つの方法が用意されています。
 
 
 ### Broadcast Join
