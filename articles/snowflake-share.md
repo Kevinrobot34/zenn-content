@@ -88,6 +88,59 @@ Data Sharing の仕組みを踏まえると比較的想像しやすいかと思�
   * クロスリージョン・クラウドに共有するために Listing の Auto-fulfill を利用したり、自分で Replication の仕組みを構築した場合その転送料金はかかる
 
 
+## Share に関連する SQL
+
+### DDL
+
+DDL を見ておくと全体像が掴みやす句なると思います。
+Share 自体はどのアカウントに共有をするか、という情報を保持するわけですね。
+
+* [CREATE SHARE]( https://docs.snowflake.com/ja/sql-reference/sql/create-share )
+  ```sql
+  CREATE [ OR REPLACE ] SHARE [ IF NOT EXISTS ] <name>
+    [ COMMENT = '<string_literal>' ]
+  ```
+* [ALTER SHARE]( https://docs.snowflake.com/ja/sql-reference/sql/alter-share )
+  ```sql
+  ALTER SHARE [ IF EXISTS ] <name> { ADD | REMOVE } ACCOUNTS = <consumer_account> [ , <consumer_account> , ... ]
+                                          [ SHARE_RESTRICTIONS = { TRUE | FALSE } ]
+
+  ALTER SHARE [ IF EXISTS ] <name> SET { [ ACCOUNTS = <consumer_account> [ , <consumer_account> ... ] ]
+                                        [ COMMENT = '<string_literal>' ] }
+
+  ALTER SHARE [ IF EXISTS ] <name> SET TAG <tag_name> = '<tag_value>' [ , <tag_name> = '<tag_value>' ... ]
+
+  ALTER SHARE <name> UNSET TAG <tag_name> [ , <tag_name> ... ]
+
+  ALTER SHARE [ IF EXISTS ] <name> UNSET COMMENT
+  ```
+
+
+### DCL
+
+どのデータを共有するかは Share に対する権限付与で行います。詳細は後述します。
+* [GRANT <privilege> … TO SHARE]( https://docs.snowflake.com/en/sql-reference/sql/grant-privilege-share )
+  ```sql
+  GRANT objectPrivilege ON
+      {  DATABASE <name>
+        | SCHEMA <name>
+        | FUNCTION <name>
+        | { TABLE <name> | ALL TABLES IN SCHEMA <schema_name> }
+        | { EXTERNAL TABLE <name> | ALL EXTERNAL TABLES IN SCHEMA <schema_name> }
+        | { ICEBERG TABLE <name> | ALL ICEBERG TABLES IN SCHEMA <schema_name> }
+        | { DYNAMIC TABLE <name> | ALL DYNAMIC TABLES IN SCHEMA <schema_name> }
+        | TAG <name>
+        | VIEW <name>  }
+    TO SHARE <share_name>
+  ```
+* [GRANT DATABASE ROLE … TO SHARE]( https://docs.snowflake.com/en/sql-reference/sql/grant-database-role-share )
+  ```sql
+  GRANT DATABASE ROLE <name>
+    TO SHARE <share_name>
+  ```
+  * Database role への権限追加は https://docs.snowflake.com/en/sql-reference/sql/grant-privilege を見てください
+
+
 ## Data Sharing 可能なオブジェクト
 
 以下のオブジェクトが共有可能です。
@@ -209,7 +262,8 @@ https://docs.snowflake.com/en/sql-reference/sql/grant-privilege-share
 以下の手順で実行します。
 
 1. 共有対象の Database で Database role を作成する
-   * Database role については https://zenn.dev/dataheroes/articles/snowflake-database-role-20240727 が分かりやすいです
+   * Database role については以下が分かりやすいです
+     https://zenn.dev/dataheroes/articles/snowflake-database-role-20240727
 2. 1 の Database role にオブジェクトの権限を付与する
    * 詳細は https://docs.snowflake.com/en/sql-reference/sql/grant-privilege
    * いくつか注意点があります
