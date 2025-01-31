@@ -11,9 +11,15 @@ publication_name: finatext
 
 こんにちは！ナウキャストのデータエンジニアのけびんです。
 
-現在ナウキャストでは dbt-snowflake を利用して Snowflake 上で ELT パイプラインを日々開発しています。
+現在ナウキャストでは dbt-snowflake を利用して Snowflake 上で ELT パイプラインを日々開発しています。基本的には dbt の使い方を把握していれば開発は可能ですが、やはり Snowflake 特有の設定というのも存在します。
 
-Snowflake 特有な dbt の設定についてまとめようと思います。
+本ブログでは dbt-snowflake で開発をする際に個人的に重要だと思う以下の設定についてまとめます。
+
+* Table - Clustering
+* Table - COPY GRANTS
+* External Table
+* Secure View
+* Query Tag / Comment
 
 ## Table - Clustering
 
@@ -21,10 +27,20 @@ Snowflake 特有な dbt の設定についてまとめようと思います。
 
 大規模なテーブルにおいて Clustering の設定はパフォーマンスを向上させるために重要です。
 
-* clustering はデータをソートしておき、局所性を増す（似たデータが近くに配置されるようにする）こと
-* partitioning は大規模なデータを小さく管理しやすいデータに分割して保存しておくこと
-  * 日付のカラムの値に応じてデータを分割しておく、といった設定が多い
-  * これにより日付に関するフィルタリングの際に partition pruning が可能になる
+**Partitioning** とは大規模なデータを小さく管理しやすいデータに分割して保存しておく手法です。特定のカラムの値に応じてファイルを分割するということが多いです。例えば日付のカラムで Partitioning しておくと、日付に関する条件があるクエリでは Partition Pruning が可能になります。
+
+一方 **Clustering** とはあるテーブル全体のデータの分布に関する話で、特定のカラムでデータをソートしておくことでテーブル全体のデータの局所性を増す（似たデータが近くに配置されるようにする）という手法です。
+
+Snowflake では Clustering (ソート) の設定が Partitioning に直結するため非常に重要です。
+
+Snowflake ではデータは micro partition として数百MBごとに分割して保存されますが、その作られ方としてはデータが来た順番に適宜分割されるイメージです。ソートされていないままのデータの場合、 どの micro partition にも各カラムで幅広い値のデータが分散して保存されてしまいます。で事前にデータをソートしてからテーブルを作成するようにすると、各 micro partition にはソートで使用した列については特定の値だけ含まれるというような状況が作られるわけです。
+
+![clustering-sample](/images/articles/dbt-snowflake-important-configurations/clustering-sample.png =500x)
+*https://select.dev/posts/snowflake-clustering より。created_at でソートされているため created_at では pruning しやすい形で分割されているが、それ以外のカラムではどの partition でも幅広い値が含まれ pruning はできない形になっていることがわかる。*
+
+
+### Natural Clustering と Automatic Clustering
+
 * Snowflake では Clustering (ソート) の設定が partitioning に直結する
   * Snowflake では micro partition として数百MBごとにデータを分割して保存している
   * テーブルを作成する際に、事前にデータをソートしておけば、その分上から順番に micro partition が作られる → ソートで設定した列の値で partition しているような状況になる
@@ -153,7 +169,7 @@ sources:
 https://zenn.dev/dataheroes/articles/snowflake-external-table
 
 
-## View
+## Secure View
 
 Snowflake はデータ共有系の機能が強いですが、その際のセキュリティを担保するために Snowflake の View には Secure View と普通の View があります。具体的な違いとしては
 
@@ -166,7 +182,7 @@ Snowflake はデータ共有系の機能が強いですが、その際のセキ�
 
 といった点が挙げられます。
 
-dbt-snowflake において Secure view を作成するためには [`secure`]( https://docs.getdbt.com/reference/resource-configs/snowflake-configs#secure-views ) という設定を true にしておけば良いです。
+dbt-snowflake において Secure view を作成するためには [`secure`]( https://docs.getdbt.com/reference/resource-configs/snowflake-configs#secure-views ) という設定を true にするだけでOKです。
 
 https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/view/create.sql#L1-L9
 
@@ -176,9 +192,9 @@ https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba
 
 `query_tag` の config をつかしておくと dbt が実行するクエリにタグをつけておくことができる。
 
-この辺りは SELECT 社の dbt-snowflake-monitoring が非常に便利。
+この辺りは SELECT 社の dbt-snowflake-monitoring が非常に便利です。 `dbt_project.yml` に以下のような設定を追加しておくことで、有用な tag や comment が付与されます。
 
-```dbt_project.yml
+```yaml
 dispatch:
   - macro_namespace: dbt
     search_order:
@@ -195,9 +211,8 @@ query-comment:
 * https://github.com/get-select/dbt-snowflake-monitoring
 
 
+## まとめ
 
+基本的には https://docs.getdbt.com/reference/resource-configs/snowflake-configs にある程度記載がある内容ではありますが、実際の dbt-snowflake のコードも見つつ整理すると具体的な挙動などの理解が深まるかなと思います。
 
-## References
-
-* https://docs.getdbt.com/reference/resource-configs/snowflake-configs
-* 
+dbt-snowflake 使い倒していきましょう！
