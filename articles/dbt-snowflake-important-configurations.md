@@ -17,7 +17,7 @@ Snowflake 特有な dbt の設定についてまとめようと思います。
 
 ## Table - Clustering
 
-### Partitioning と Clustering のおsらい
+### Partitioning と Clustering のおさらい
 
 大規模なテーブルにおいて Clustering の設定はパフォーマンスを向上させるために重要です。
 
@@ -65,6 +65,7 @@ select
     ...
 ```
 
+より細かい挙動を知りたい場合には dbt-snowflake の以下のあたりのコードを参照してください。
 
 https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/table/create.sql#L12-L13
 
@@ -113,15 +114,61 @@ https://speakerdeck.com/kevinrobot34/privilege-and-cost-management-in-snowflake
 
 ## External Table
 
+dbt-external-tables というパッケージを利用すれば、 Snowflake の External Table を dbt の source として設定することも可能です。
 
+https://github.com/dbt-labs/dbt-external-tables
+
+このパッケージを利用することで source の yaml において external というセクションにて外部テーブルに関する情報（ステージやパーティションなど）を追記することができるようになります。
+
+```yaml
+
+version: 2
+
+sources:
+  - name: POS_A
+    schema: POS_A
+    description: Lake layer of POS_A data
+    tables:
+      - name: original_transaction
+        description: >
+          POS_A transaction data.
+          Data is located in `s3://{pos_bucket}/nikkei/source/original/` with Hive partition.
+        columns:
+          - name: data_date
+            ...
+        external:
+          file_format: "(TYPE=CSV COMPRESSION=NONE SKIP_HEADER=0 BINARY_FORMAT=UTF8 NULL_IF=())"
+          location: '@{{target.database}}.POS_A.S3_POS_A_BUCKET/transaction/'
+          partitions:
+            - name: received_date_partition
+              data_type: date
+              expression: TO_DATE(split_part(split_part(metadata$filename, '/', 7), '_', 1), 'YYYYMMDD')
+              description: >
+                One of the partition columns.
+                Corresponding `data_date`.
+            - ...
+```
+
+外部テーブルに関しては以下の記事もご覧ください。
 https://zenn.dev/dataheroes/articles/snowflake-external-table
+
 
 ## View
 
-* `secure`
+Snowflake はデータ共有系の機能が強いですが、その際のセキュリティを担保するために Snowflake の View には Secure View と普通の View があります。具体的な違いとしては
 
-https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/view/create.sql#L1-L11
+* 普通の View
+  * View の定義がオーナー以外でも確認可能
+  * View にクエリした際、定義情報などを利用して最適化が実行される
+* Secure View
+  * View の定義はオーナーしか確認できず、安全
+  * Secure View にクエリした際、定義情報などは利用できず一部の最適化ができない
 
+といった点が挙げられます。
+
+dbt-snowflake において Secure view を作成するためには [`secure`]( https://docs.getdbt.com/reference/resource-configs/snowflake-configs#secure-views ) という設定を true にしておけば良いです。
+
+https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/view/create.sql#L1-L9
 
 
 
