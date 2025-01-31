@@ -3,7 +3,7 @@ title: "dbt-snowflake の重要な設定"
 emoji: "🦔"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["dbt", "DataEngineering", "SQL", "Snowflake"]
-published: false
+published: true
 publication_name: finatext
 ---
 
