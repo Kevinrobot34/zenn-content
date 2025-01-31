@@ -39,12 +39,18 @@ Snowflake ではデータは micro partition として数百MBごとに分割し
 
 ちなみに Clustering するタイミングは大きく分けて２つあります。
 
-* テーブルを作成する前に明示的に order by を指定しておく
+* テーブルを作成する前に明示的に order by を指定しておく（natural clustering）
 * automatic clustering として Snowflake に定期的にソートしてテーブルを再作成してもらう
-  * automatic clustering に関しては clustering 自体を実行する金額と、これによるコスト削減金額とを天秤にかけて実行するかどうかを考えることが大事です
 
 この辺りのことは以下の記事が詳しいです。
 https://select.dev/posts/snowflake-clustering
+
+:::message alert
+Snowflake の automatic clustering は定期的に dbt model の full refresh をしてくれる機能みたいなものです。適切に行えばもちろんコスト削減につながりますが、 **clustering 自体の実行にもお金がかかる**ことに注意してください。
+
+基本的には Natural Clustering を行うためのテーブル設計をまずしっかり検討し、それでもパフォーマンス改善につながらなければ automatic clustering を試す、という流れが良いのかなと筆者は考えています。 automatic clustering を有効化した場合、コストの監視はしっかり行いましょう。
+:::
+
 
 
 ### Clustering に関する設定
@@ -84,6 +90,8 @@ select
 https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/table/create.sql#L12-L13
 
 https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/table/create.sql#L45-L58
+
+
 
 
 ## Table - COPY GRANTS
