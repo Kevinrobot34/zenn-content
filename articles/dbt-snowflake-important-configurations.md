@@ -39,8 +39,12 @@ Snowflake ではデータは micro partition として数百MBごとに分割し
 
 ちなみに Clustering するタイミングは大きく分けて２つあります。
 
-* テーブル作成時やデータの挿入時に前もって明示的にソートしておく（manual clustering / natural clustering）
 * automatic clustering として Snowflake に定期的にソートしてテーブルを再作成してもらう
+  * Snowflake が定期的に行う
+* テーブル作成時やデータの挿入時に前もって明示的にソートしておく
+  * こちらの場合、Automatic Clustering と違い全て自分で行う
+  * 作成時に適切に order by 句でソートしておく：Manual Clustering
+  * ELTで定期実行する中で自然とクラスタリングされる：Natural Clustering
 
 この辺りのことは以下の記事が詳しいです。
 https://select.dev/posts/snowflake-clustering
@@ -73,6 +77,8 @@ select
 from {{ ref("upstream_model")}}
 order by (col1, col2) -- 明示的にソートする
 ```
+
+差分更新を行う場合にはそこの実行ロジックによって、良い Natural Clustering となるかが決まるので実装には注意しましょう。
 
 
 ### Automatic Clustering
