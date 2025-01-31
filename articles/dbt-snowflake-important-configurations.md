@@ -11,15 +11,13 @@ publication_name: finatext
 
 こんにちは！ナウキャストのデータエンジニアのけびんです。
 
-現在ナウキャストでは dbt-snowflake を利用して Snowflake 上で ELT パイプラインを日々開発しています。基本的には dbt の使い方を把握していれば開発は可能ですが、やはり Snowflake 特有の設定というのも存在します。
-
-本ブログでは dbt-snowflake で開発をする際に個人的に重要だと思う以下の設定についてまとめます。
+現在ナウキャストでは dbt-snowflake を利用して Snowflake 上で ELT パイプラインを日々開発しています。基本的には dbt の使い方を把握していれば開発は可能ですが、やはり Snowflake 特有の設定というのも存在します。本ブログでは dbt-snowflake で開発をする際に個人的に重要だと思う以下の設定についてまとめます。
 
 * Table - Clustering
 * Table - COPY GRANTS
 * External Table
 * Secure View
-* Query Tag / Comment
+
 
 ## Table - Clustering
 
@@ -35,37 +33,33 @@ Snowflake では Clustering (ソート) の設定が Partitioning に直結す�
 
 Snowflake ではデータは micro partition として数百MBごとに分割して保存されますが、その作られ方としてはデータが来た順番に適宜分割されるイメージです。ソートされていないままのデータの場合、 どの micro partition にも各カラムで幅広い値のデータが分散して保存されてしまいます。で事前にデータをソートしてからテーブルを作成するようにすると、各 micro partition にはソートで使用した列については特定の値だけ含まれるというような状況が作られるわけです。
 
-![clustering-sample](/images/articles/dbt-snowflake-important-configurations/clustering-sample.png =500x)
+![clustering-sample](/images/articles/dbt-snowflake-important-configurations/clustering-sample.png =600x)
 *https://select.dev/posts/snowflake-clustering より。created_at でソートされているため created_at では pruning しやすい形で分割されているが、それ以外のカラムではどの partition でも幅広い値が含まれ pruning はできない形になっていることがわかる。*
 
 
-### Natural Clustering と Automatic Clustering
+ちなみに Clustering するタイミングは大きく分けて２つあります。
 
-* Snowflake では Clustering (ソート) の設定が partitioning に直結する
-  * Snowflake では micro partition として数百MBごとにデータを分割して保存している
-  * テーブルを作成する際に、事前にデータをソートしておけば、その分上から順番に micro partition が作られる → ソートで設定した列の値で partition しているような状況になる
-  * ソートだけでなく、定期実行する場合には自然と clustering / partitioning される部分もある
-* Snowflake の automatic clustering について
-  * 定期的にデータが追加されたりすると、 clustering されていない状態になってしまったりする
-  * 「テーブルを指定されたカラムでソートし直して再作成することで clustering された状態にしておく」という操作を定期的に自動で行ってくれるのが automatic clustering
-  * 定期的に dbt model のフルリフレッシュをして作り直してくれるイメージで、この操作自体にお金がかかるため、使い方は要注意
-* これらの話を踏まえると以下の二点が大事
-  * dbt model でテーブルを作る際に、データはソートしておく → `cluster_by` の設定
-  * automatic clustering が必要であればそれを明示しておく → `automatic_clustering` の設定
-* 参考
-  * https://select.dev/posts/snowflake-clustering
+* テーブルを作成する前に明示的に order by を指定しておく
+* automatic clustering として Snowflake に定期的にソートしてテーブルを再作成してもらう
+  * automatic clustering に関しては clustering 自体を実行する金額と、これによるコスト削減金額とを天秤にかけて実行するかどうかを考えることが大事です
+
+この辺りのことは以下の記事が詳しいです。
+https://select.dev/posts/snowflake-clustering
 
 
 ### Clustering に関する設定
 
-dbt model の config において `cluster_by` と `automatic_clustering` の２つを適宜設定すればOKです。
+実際に Clustering を行うためには、 dbt model の config において `cluster_by` と `automatic_clustering` の２つを適宜設定すればOKです。
 
 * `cluster_by`
   * デフォルト : none
-  * これを設定しているとモデルの最後に order by 句が入る
+  * モデルの最後に order by 句を入れるかどうかを制御できる
 * `automatic_clustering`
   * デフォルト : `false`
-  * `alter {{ alter_prefix }} table {{relation}} resume recluster;` を実行するかどうかを制御する
+  * モデル実行後、以下のクエリを実行するかを制御する
+    ```sql
+    alter {{ alter_prefix }} table {{relation}} resume recluster;
+    ```
 
 ```sql
 {{
@@ -186,29 +180,6 @@ dbt-snowflake において Secure view を作成するためには [`secure`]( h
 
 https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/view/create.sql#L1-L9
 
-
-
-## Query Tag / Comment
-
-`query_tag` の config をつかしておくと dbt が実行するクエリにタグをつけておくことができる。
-
-この辺りは SELECT 社の dbt-snowflake-monitoring が非常に便利です。 `dbt_project.yml` に以下のような設定を追加しておくことで、有用な tag や comment が付与されます。
-
-```yaml
-dispatch:
-  - macro_namespace: dbt
-    search_order:
-      - nowcast_datahub_nikkei_dev
-      - dbt_snowflake_query_tags
-      - dbt
-query-comment:
-  comment: "{{ dbt_snowflake_query_tags.get_query_comment(node) }}"
-  append: true # Snowflake removes prefixed comments.
-```
-
-* https://docs.getdbt.com/reference/project-configs/query-comment
-* https://select.dev/posts/snowflake-query-tags
-* https://github.com/get-select/dbt-snowflake-monitoring
 
 
 ## まとめ
