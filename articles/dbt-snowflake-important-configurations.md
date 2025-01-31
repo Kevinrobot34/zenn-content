@@ -37,7 +37,7 @@ Snowflake ではデータは micro partition として数百MBごとに分割し
 *https://select.dev/posts/snowflake-clustering より。created_at でソートされているため created_at では pruning しやすい形で分割されているが、それ以外のカラムではどの partition でも幅広い値が含まれ pruning はできない形になっていることがわかる。*
 
 
-ちなみに Clustering するタイミングは大きく分けて２つあります。
+ちなみに Clustering する方法は大きく分けて２つあります。
 
 * automatic clustering として Snowflake に定期的にソートしてテーブルを再作成してもらう
   * Snowflake が定期的に行う
