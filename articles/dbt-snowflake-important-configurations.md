@@ -46,9 +46,10 @@ Snowflake ではデータは micro partition として数百MBごとに分割し
 https://select.dev/posts/snowflake-clustering
 
 :::message alert
-Snowflake の automatic clustering は定期的に dbt model の full refresh をしてくれる機能みたいなものです。適切に行えばもちろんコスト削減につながりますが、 **clustering 自体の実行にもお金がかかる**ことに注意してください。
+Snowflake の automatic clustering は定期的に dbt model の full refresh をしてくれる機能というようなイメージです。適切に行えばもちろんコスト削減につながりますが、 **clustering 自体の実行にもお金がかかる**ことに注意してください。
 
-基本的には Natural Clustering を行うためのテーブル設計をまずしっかり検討し、それでもパフォーマンス改善につながらなければ automatic clustering を試す、という流れが良いのかなと筆者は考えています。 automatic clustering を有効化した場合、コストの監視はしっかり行いましょう。
+基本的には Natural Clustering を行うためのテーブル設計をまずしっかり検討し、それでもパフォーマンス改善につながらなければ automatic clustering を試す、という流れが良いのかなと筆者は考えています。 
+automatic clustering を有効化した場合、コスト監視はしっかり行いましょう。
 :::
 
 
@@ -60,7 +61,7 @@ Snowflake の automatic clustering は定期的に dbt model の full refresh �
 * `cluster_by`
   * デフォルト : none
   * モデルの最後に order by 句を入れるかどうかを制御できる
-  * また、以下のクエリを時効するかを制御する
+  * また、以下のクエリを実行するかを制御する
     ```sql
     alter {{ alter_prefix }} table {{relation}} cluster by ({{cluster_by_string}});
     ```
