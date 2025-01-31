@@ -15,10 +15,34 @@ publication_name: finatext
 
 Snowflake 特有な dbt の設定についてまとめようと思います。
 
-## Table
+## Table - Clustering
+
+### Partitioning と Clustering のおsらい
+
+大規模なテーブルにおいて Clustering の設定はパフォーマンスを向上させるために重要です。
+
+* clustering はデータをソートしておき、局所性を増す（似たデータが近くに配置されるようにする）こと
+* partitioning は大規模なデータを小さく管理しやすいデータに分割して保存しておくこと
+  * 日付のカラムの値に応じてデータを分割しておく、といった設定が多い
+  * これにより日付に関するフィルタリングの際に partition pruning が可能になる
+* Snowflake では Clustering (ソート) の設定が partitioning に直結する
+  * Snowflake では micro partition として数百MBごとにデータを分割して保存している
+  * テーブルを作成する際に、事前にデータをソートしておけば、その分上から順番に micro partition が作られる → ソートで設定した列の値で partition しているような状況になる
+  * ソートだけでなく、定期実行する場合には自然と clustering / partitioning される部分もある
+* Snowflake の automatic clustering について
+  * 定期的にデータが追加されたりすると、 clustering されていない状態になってしまったりする
+  * 「テーブルを指定されたカラムでソートし直して再作成することで clustering された状態にしておく」という操作を定期的に自動で行ってくれるのが automatic clustering
+  * 定期的に dbt model のフルリフレッシュをして作り直してくれるイメージで、この操作自体にお金がかかるため、使い方は要注意
+* これらの話を踏まえると以下の二点が大事
+  * dbt model でテーブルを作る際に、データはソートしておく → `cluster_by` の設定
+  * automatic clustering が必要であればそれを明示しておく → `automatic_clustering` の設定
+* 参考
+  * https://select.dev/posts/snowflake-clustering
 
 
-### Clustering 周りの設定
+### Clustering に関する設定
+
+dbt model の config において `cluster_by` と `automatic_clustering` の２つを適宜設定すればOKです。
 
 * `cluster_by`
   * デフォルト : none
@@ -27,8 +51,28 @@ Snowflake 特有な dbt の設定についてまとめようと思います。
   * デフォルト : `false`
   * `alter {{ alter_prefix }} table {{relation}} resume recluster;` を実行するかどうかを制御する
 
+```sql
+{{
+    config(
+        materialized="incremental",
+        incremental_strategy="delete+insert",
+        cluster_by=["date", "dim_code"],
+        automatic_clustering=true,
+    )
+}}
 
-### COPY GRANTS
+select
+    ...
+```
+
+
+https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/table/create.sql#L12-L13
+
+https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/table/create.sql#L45-L55
+
+
+
+## Table - COPY GRANTS
 
 dbt では run を実行すると `CREATE OR REPLACE TABLE AS SELECT ...` という CTAS のクエリが実行されます。２回目以降の dbt run では Replace の挙動となりますが、この際に、元のテーブルの権限を引き継ぐかどうかの設定が [`COPY GRANTS`]( https://docs.snowflake.com/ja/sql-reference/sql/create-table#label-create-table-copy-grants ) です。
 
@@ -39,7 +83,7 @@ https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba
 
 以下のように `dbt_project.yml` で [`copy_grants`]( https://docs.getdbt.com/reference/resource-configs/snowflake-configs#copying-grants ) を `true` にしておくことでこれを回避できます。 
 
-```dbt_project.yml
+```yaml
 models:
   +copy_grants: true
 ```
