@@ -61,7 +61,7 @@ automatic clustering を有効化した場合、コスト監視はしっかり�
 
 基本的には Automatic Clustering による定期的な reclustering が必要ない形でテーブルを作成できることが一番です。テーブルの性質を見極め、適宜ソートしておくべきカラムの検討がついたら、 dbt model に order by 句で明示的にソートの条件を入れましょう。
 
-これにより、 automatic clustering は無しにし、ELTの中で自然とクラスタリングされます。際クラスタリングの費用もかからないので、これが一番コスト効率は高いです。
+これにより、 automatic clustering 無しでソートされた状態になります。再クラスタリングの費用もかからないので、これが一番コスト効率は高いです。
 
 ```sql
 {{
@@ -184,7 +184,7 @@ sources:
       - name: original_transaction
         description: >
           POS_A transaction data.
-          Data is located in `s3://{pos_bucket}/nikkei/source/original/` with Hive partition.
+          Data is located in `s3://{pos_bucket}/transaction/` with Hive partition.
         columns:
           - name: data_date
             ...
