@@ -31,7 +31,7 @@ publication_name: finatext
 
 Snowflake では Clustering (ソート) の設定が Partitioning に直結するため非常に重要です。
 
-Snowflake ではデータは micro partition として数百MBごとに分割して保存されますが、その作られ方としてはデータが来た順番に適宜分割されるイメージです。ソートされていないままのデータの場合、 どの micro partition にも各カラムで幅広い値のデータが分散して保存されてしまいます。で事前にデータをソートしてからテーブルを作成するようにすると、各 micro partition にはソートで使用した列については特定の値だけ含まれるというような状況が作られるわけです。
+Snowflake ではデータは micro partition として数百MBごとに分割して保存されますが、その作られ方としてはデータが来た順番に適宜分割されるイメージです。ソートされていないままのデータの場合、 どの micro partition にも各カラムで幅広い値のデータが分散して保存されてしまいます。一方事前にデータをソートしてからテーブルを作成するようにすると、各 micro partition にはソートで使用した列については特定の値だけ含まれるというような状況が作られるわけです。
 
 ![clustering-sample](/images/articles/dbt-snowflake-important-configurations/clustering-sample.png =600x)
 *https://select.dev/posts/snowflake-clustering より。created_at でソートされているため created_at では pruning しやすい形で分割されているが、それ以外のカラムではどの partition でも幅広い値が含まれ pruning はできない形になっていることがわかる。*
