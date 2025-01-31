@@ -39,7 +39,7 @@ Snowflake ではデータは micro partition として数百MBごとに分割し
 
 ちなみに Clustering するタイミングは大きく分けて２つあります。
 
-* テーブルを作成する前に明示的に order by を指定しておく（natural clustering）
+* テーブル作成時やデータの挿入時に前もって明示的にソートしておく（manual clustering / natural clustering）
 * automatic clustering として Snowflake に定期的にソートしてテーブルを再作成してもらう
 
 この辺りのことは以下の記事が詳しいです。
@@ -53,10 +53,32 @@ automatic clustering を有効化した場合、コスト監視はしっかり�
 :::
 
 
+### Manual / Natural Clustering
 
-### Clustering に関する設定
+基本的には Automatic Clustering による定期的な reclustering が必要ない形でテーブルを作成できることが一番です。テーブルの性質を見極め、適宜ソートしておくべきカラムの検討がついたら、 dbt model に order by 句で明示的にソートの条件を入れましょう。
 
-実際に Clustering を行うためには、 dbt model の config において `cluster_by` と `automatic_clustering` の２つを適宜設定すればOKです。
+これにより、 automatic clustering は無しにし、ELTの中で自然とクラスタリングされます。際クラスタリングの費用もかからないので、これが一番コスト効率は高いです。
+
+```sql
+{{
+    config(
+        materialized="incremental",
+        incremental_strategy="delete+insert",
+        -- cluster_by や automatic_clustering については何も書かない 
+    )
+}}
+
+select
+    ...
+from {{ ref("upstream_model")}}
+order by (col1, col2) -- 明示的にソートする
+```
+
+
+### Automatic Clustering
+
+どうしても定期的な再クラスタリングが必要な場合には Automatic Clustering が利用できるような形で dbt model の設定をしましょう。
+実際に Automatic Clustering を行うためには、 dbt model の config において `cluster_by` と `automatic_clustering` の２つを適宜設定すればOKです。
 
 * `cluster_by`
   * デフォルト : none
@@ -71,6 +93,7 @@ automatic clustering を有効化した場合、コスト監視はしっかり�
     ```sql
     alter {{ alter_prefix }} table {{relation}} resume recluster;
     ```
+  * この設定を利用すると、もし dbt model 外で明示的に automatic clustering が suspend されていても再度有効化されるようになります
 
 ```sql
 {{
@@ -84,6 +107,7 @@ automatic clustering を有効化した場合、コスト監視はしっかり�
 
 select
     ...
+-- cluster_by により order by は追加されるため、明示的に order by 句を書く必要はないです
 ```
 
 より細かい挙動を知りたい場合には dbt-snowflake の以下のあたりのコードを参照してください。
