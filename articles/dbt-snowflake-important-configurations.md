@@ -54,6 +54,10 @@ https://select.dev/posts/snowflake-clustering
 * `cluster_by`
   * デフォルト : none
   * モデルの最後に order by 句を入れるかどうかを制御できる
+  * また、以下のクエリを時効するかを制御する
+    ```sql
+    alter {{ alter_prefix }} table {{relation}} cluster by ({{cluster_by_string}});
+    ```
 * `automatic_clustering`
   * デフォルト : `false`
   * モデル実行後、以下のクエリを実行するかを制御する
@@ -79,8 +83,7 @@ select
 
 https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/table/create.sql#L12-L13
 
-https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/table/create.sql#L45-L55
-
+https://github.com/dbt-labs/dbt-snowflake/blob/5d935eedbac8199e5fbf4022d291abfba8198608/dbt/include/snowflake/macros/relations/table/create.sql#L45-L58
 
 
 ## Table - COPY GRANTS
@@ -103,7 +106,7 @@ models:
 access role を適切に設計し、スキーマ単位で `future tables` の権限を適切に利用できるようにしておくことでも上記の問題は解決できます。このような Snowflake におけるロール構成に関しては以下の資料もご覧ください。
 https://speakerdeck.com/kevinrobot34/privilege-and-cost-management-in-snowflake
 
-ナウキャストでも基本的にはスキーマ単位の `future tables` に対応した access role を用意しそれを用いて権限管理ているのですが、とあるユースケースではスキーマ単位ではなく特定のテーブルに対する SELECT 権限を Terraform で管理していました。
+ナウキャストでも基本的にはスキーマ単位の `future tables` に対応した access role を用意しそれを用いて権限管理しているのですが、とあるユースケースではスキーマ単位ではなく特定のテーブルに対する SELECT 権限を Terraform で管理していました。
 その際に Terraform では特に何も変更をしていないのに以下の差分が定期的に発生しており、 `copy_grants` の設定の必要性に気づきました。
 
 ```diff
