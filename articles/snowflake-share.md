@@ -378,8 +378,11 @@ https://docs.snowflake.com/en/user-guide/secure-data-sharing-across-regions-plat
 ## Business Ciritcal Edition が Provider の場合
 
 Provider のアカウントが Business Ciritcal Edition の場合には注意が必要で、 Consumer のアカウントの Edition によってはデフォルトでは共有ができない場合があります。
-この場合、以下のように明示的に `SHARE_RESTRICTIONS=false` という設定をして共有の許可が必要です。
+この場合、以下のように明示的に `SHARE_RESTRICTIONS=false` という設定をして共有の許可が必要です。この設定のためには `OVERRIDE SHARE RESTRICTIONS` 権限を持つロールを利用する必要があります。
 ```sql
+use role accountadmin;
+grant override share restrictions on account to role sysadmin;
+
 use role sysadmin;
 alter share my_share add accounts = consumerorg.consumeraccount SHARE_RESTRICTIONS=false;
 ```
@@ -389,7 +392,7 @@ https://docs.snowflake.com/en/user-guide/data-sharing-provider#data-sharing-and-
 https://docs.snowflake.com/en/user-guide/override_share_restrictions
 
 
-注意点として Terraform ではまだ `SHARE_RESTRICTIONS` の取り扱いが対応していません。
+注意点として、2025年2月現在 Terraform ではまだ `SHARE_RESTRICTIONS` の取り扱いが対応していません。
 https://github.com/Snowflake-Labs/terraform-provider-snowflake/issues/630
 
 
