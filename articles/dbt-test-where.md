@@ -3,9 +3,8 @@ title: "dbt test を効率化するTips"
 emoji: "🗺️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["dbt", "DataEngineering", "SQL", "Snowflake"]
-published: false
+published: true
 publication_name: finatext
-
 ---
 
 ## はじめに
