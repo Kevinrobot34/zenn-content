@@ -31,7 +31,7 @@ dbt test には自分で SQL でテストを書く Singular テストと、は�
 not-null 制約などよくある内容であれば、 Generic テストを利用するのが便利です。例えば弊社で取り扱っている POS データの transaction に関するデータであれば以下のような yaml を書いておくだけでカラムごとに適宜 dbt test が簡単に定義できます。（サンプルとして簡略化しています。）
 
 
-```models/_schema.yml
+```yaml
 version: 2
 
 models:
@@ -106,7 +106,7 @@ https://docs.getdbt.com/reference/resource-configs/where
 
 これを利用するとテストの途中に where 句を追加することができ、テストの効率化ができるわけです。実際に試してみましょう。以下のように `config` を追加してみます。
 
-```models/_schema.yml
+```yaml
 version: 2
 
 models:
