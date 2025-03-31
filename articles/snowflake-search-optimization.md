@@ -3,7 +3,7 @@ title: "Snowflake Search Optimization 徹底解説"
 emoji: "🔍"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "DataEngineering", "SQL"]
-published: true
+published: false
 publication_name: finatext
 ---
 
