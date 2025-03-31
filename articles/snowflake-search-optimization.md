@@ -3,7 +3,7 @@ title: "Snowflake Search Optimization 徹底解説"
 emoji: "🔍"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "DataEngineering", "SQL"]
-published: false
+published: true
 publication_name: finatext
 ---
 
@@ -75,8 +75,8 @@ ALTER TABLE test_table ADD SEARCH OPTIMIZATION;
   * `=` もしくは `in` による where 句があるクエリの最適化の際に使えます
   * ただし `not in` の場合には使えません
   * Join の際にも効果を発揮してくれることがあります
-  * 詳細は[こちら](https://docs.snowflake.com/en/user-guide/search-optimization/point-lookup-queries)と[こちら](https://docs.snowflake.com/en/user-guide/search-optimization/join-queries)
   * カラムの型としては numerical / string / binary / VARIANT と幅広く使えます
+  * 詳細は[こちら](https://docs.snowflake.com/en/user-guide/search-optimization/point-lookup-queries)と[こちら](https://docs.snowflake.com/en/user-guide/search-optimization/join-queries)
 * `SUBSTRING`
   * その名の通り部分文字列に関する検索、具体的には `LIKE` や `REGEXP_LIKE` を利用した where 句があるクエリの最適化に使えます
   * カラムの型としては string / VARIANT で使えます
@@ -106,7 +106,9 @@ Search Optimization は追加でデータ構造を管理・維持しておくこ
 * where 句で指定している列のカーディナリティが高い（10万以上の異なる値を持つ）こと
 * where 句でフィルターした結果、参照すべきパーティションが少ないこと
   * search optimization は partition pruning できる機会を増やすという仕組みなので、元々多数の partition を読み込まないといけないクエリの高速化はできない
+  * 言い換えると、ある列の各値が多くのパーティションに散らばって存在している場合、 search optimization を利用しても結局フルスキャンとあまり変わらない結果となってしまい効果が薄い
 * クラスタリングキー以外での絞り込みを含むクエリ
+  * クラスタリングキーと比較的そう感があるカラムだと相性が良い
 
 
 ### データ型
@@ -118,15 +120,14 @@ Search Optimization は追加でデータ構造を管理・維持しておくこ
   * BINARY
   * VARIANT / OBJECT / ARRAY
   * GEOGRAPHY
+  * 先述したようにデータ型によって使える Search Method は異なるのでその点は要注意
 * 逆にサポートされていないデータ型
-  * FLOAT や GEOMETRY
+  * **FLOAT と GEOMETRY**
 
 
 ### テーブル種別
 
-Search Optimization は普通のテーブルに対して有効化可能です。
-
-一方外部テーブル・ビュー・マテリアライズドビューに対しては有効化できないので注意してください・
+Search Optimization は普通のテーブルに対して有効化可能です。一方、**外部テーブル・ビュー・マテリアライズドビューに対しては有効化できない**ので注意してください。
 
 
 
