@@ -11,7 +11,7 @@ publication_name: finatext
 
 こんにちは！ナウキャストのデータエンジニアのけびんです。
 
-Snowflake は様々な便利な機能がありますが、その一つに **"Search Optimization" （検索最適化サービス）**があります。 Search Optimization は大規模なテーブルに対する選択的な検索などのクエリのパフォーマンスを向上させるための仕組みです。
+Snowflake は様々な便利な機能がありますが、その一つに **"Search Optimization" （検索最適化サービス）** があります。 Search Optimization は大規模なテーブルに対する選択的な検索などのクエリのパフォーマンスを向上させるための仕組みです。
 
 https://docs.snowflake.com/ja/user-guide/search-optimization-service
 
@@ -111,12 +111,15 @@ Search Optimization は普通のテーブルに対して有効化可能です。
 
 ## 必要な権限
 
-Search Optimization は `ALTER TABLE ... ADD SEARCH OPTIMIZATION` でテーブルに対し有効化しますが、設定時には以下の権限が必要です。
+### 有効化時
+Search Optimization は [`ALTER TABLE ... ADD SEARCH OPTIMIZATION`]( https://docs.snowflake.com/en/sql-reference/sql/alter-table#search-optimization-actions-searchoptimizationaction ) でテーブルに対し有効化しますが、設定時には以下の権限が必要です。
 
 * テーブルに対する **OWNERSHIP** 権限
 * テーブルを含む**スキーマ**に対する **ADD SEARCH OPTIMIZATION** 権限
   * おそらくスキーマの中で新たなデータ構造として search access path を作るため、 ADD SEARCH OPTIMIZATION 権限はスキーマの権限の一つなのだと思います
 
+
+### 利用時
 
 Search Optimization による最適化を行うためには特に追加の権限は必要ありません。 Search Optimization が有効化されたテーブルに対する SELECT 権限があれば、自動的に利用可能となっています。コンパイル時に必要と判断されれば Search Optimization が勝手に使われるだけという形です。
 
@@ -138,15 +141,15 @@ Search Optimization を有効化するとコストが発生します。このコ
 
 Search Optimization を有効化すると、 Search Access Path が構築・維持されますが、その際にコンピューティングコストが発生します。 Search Optimization はサーバレス機能の一つなため、この際に使われるのは Snowflake managed なコンピュートリソースです。
 
+注意点としては以下のとおりです。
+* 大きなテーブル（テラバイト（TB）以上のデータを含むテーブル）に検索最適化を追加すると、短期間にクレジット消費量が即座に増加する可能性があります
+* テーブルのデータが大量に変更される場合にも Search Access Path の更新が必要となるためコストが追加でかかります
+  * このあたりは clustering の費用とイメージは近いです
+* 自動クラスタリングされているテーブルの場合、 Search Optimization のメンテナンスコストがさらに増加される可能性があります
+  * パーティションが再構成されるので原理を考えると当たり前ではあります
+  * テーブルのチャーンレートが高いほど、 Search Optimization のメンテナンスコストも高くなります
+  * テーブル全体を再クラスタリングする場合には、一度 Search Optimization の設定を消し、再クラスタリングした後に、再度 Search Optimization を有効化した方が安いこともあるようです
 
-自動クラスタリング は、検索最適化を使用してテーブル内のクエリの遅延を改善できますが、検索最適化のメンテナンスコストをさらに増加させる可能性があります。テーブルのチャーンレートが高い場合は、自動クラスタリングを有効にしてテーブルの検索最適化を構成すると、テーブルが検索最適化用に構成されている場合よりもメンテナンスコストが高くなる可能性があります。
-
-
-
-大きなテーブル（テラバイト（TB）以上のデータを含むテーブル）に検索最適化を追加すると、短期間にクレジット消費量が即座に増加する可能性があります。
-
-
-テーブルに検索最適化を追加すると、メンテナンスサービスは、すぐにバックグラウンドでテーブルの検索アクセスパスの構築を開始します。テーブルが大きい場合、メンテナンスサービスがこの作業を大規模に並列化する可能性があり、その結果、短期間にコストが増加する可能性があります。
 
 
 ### コストの見積もり
@@ -187,7 +190,9 @@ https://docs.snowflake.com/ja/user-guide/search-optimization-service#other-optio
   * それら以外の列での検索がある場合には追加で Search Optimization を検討の余地がある
   * また、 Equality 以外での検索の高速化をしたい場合には Search Optimization でないといけない
 * コストについて
-  * 自動クラスタリング は、検索最適化を使用してテーブル内のクエリの遅延を改善できますが、検索最適化のメンテナンスコストをさらに増加させる可能性があります。テーブルのチャーンレートが高い場合は、自動クラスタリングを有効にしてテーブルの検索最適化を構成すると、テーブルが検索最適化用に構成されている場合よりもメンテナンスコストが高くなる可能性があります。
+  * 自動クラスタリングされているテーブルの場合、 Search Optimization のメンテナンスコストがさらに増加される可能性があります
+    * パーティションが再構成されるので原理を考えると当たり前ではあります
+    * テーブル全体を再クラスタリングする場合には、一度 Search Optimization の設定を消し、再クラスタリングした後に、再度 Search Optimization を有効化した方が安いこともあるようです
 
 
 
@@ -199,8 +204,3 @@ https://docs.snowflake.com/ja/user-guide/search-optimization-service#other-optio
 
 
 
-
-## References
-
-* https://docs.snowflake.com/en/sql-reference/sql/alter-table#label-alter-table-searchoptimizationaction-add
-* 
