@@ -19,10 +19,9 @@ https://docs.snowflake.com/ja/user-guide/search-optimization-service
 本ブログでは Search Optimization に関する概要を説明し、利用時の注意点や具体的なユースケースを紹介していきます。
 
 
-
 ## 仕組み
 
-クエリのパフォーマンスを向上させるためには**余計なマイクロパーティションを読み込まない**ことが重要です。例えば Clustering ではデータをソートして似たデータが近いパーティションに含まれるようにすることで partition pruning の効率を向上します。今回注目している Search Optimization が有効化されると "Search Access Path" と呼ばれるデータ構造が追加で維持・管理されるようになります。選択的な検索等の特定のクエリでこの Search Access Path を利用することで partition pruning を可能にし、パフォーマンスの向上に役立てます。
+クエリのパフォーマンスを向上させるためには**余計なマイクロパーティションを読み込まない**ことが重要です。例えば Clustering ではデータをソートして似たデータが近いパーティションに含まれるようにすることで partition pruning の効率を向上します。今回のテーマである Search Optimization が有効化されると **"Search Access Path"** と呼ばれるデータ構造が追加で維持・管理されるようになります。特定のクエリでこの Search Access Path を参照することで選択的な検索などの際に partition pruning を可能にし、パフォーマンスの向上に役立てます。
 
 ![snowflake-arch](/images/articles/snowflake-search-optimization/how-it-works.png)
 *https://quickstarts.snowflake.com/guide/getting_started_with_search_optimization/index.html#0 より*
@@ -30,12 +29,12 @@ https://docs.snowflake.com/ja/user-guide/search-optimization-service
 
 Search Access Path のイメージとしては Python の Dict のような構造で、特定の列の値と Partition の対応関係を保持しているのだと思います。このようなデータを利用することで特定の検索クエリに対し参照すべき partition を高速に判定できるようになるわけです。
 ```python
-{
-    "Martin": "Partition A",
-    "John": "Partition B",
-    "Kevin": "Partition C",
+search_access_path = {
+    "Martin": ["Partition A"],
+    "John": ["Partition B", "Partition D"],
+    "Kevin": ["Partition C"],
     ...
-}
+} # <column value>: <list of partition id>
 ```
 
 :::message
@@ -43,15 +42,54 @@ Search Access Path のイメージとしては Python の Dict のような構�
 :::
 
 
-
 ## 用語
 
 * Search Access Path
+  * Search Optimization を有効化したテーブルで新しく維持管理されるデータ構造のこと
+  * 対象テーブルの列の特定の値がどのマイクロパーティションに含まれるか、という情報を保持している
 * Search Method
-  * `FULL_TEXT` / `EQUALITY` / `SUBSTRING` / `GEO` の4つがある
-  * それぞれに応じておそらく必要となるデータ構造が違う
+  * Search Optimization がどのような検索クエリを対象とするかを指定する
+  * `EQUALITY` / `SUBSTRING` / `FULL_TEXT` / `GEO` の4つがあります
+  * それぞれに応じておそらく必要となるデータ構造が違うため、有効化の際に指定する必要がある
   * 詳細は[こちら]( https://docs.snowflake.com/en/sql-reference/sql/alter-table#label-alter-table-searchoptimizationaction-add )をご覧ください
 
+
+## Search Optimization の操作
+
+以下で記載の通り基本的には以下のように Alter Table で設定を行います。
+https://docs.snowflake.com/en/user-guide/search-optimization/enabling
+
+```sql
+-- Search optimization の有効化
+ALTER TABLE t1 ADD SEARCH OPTIMIZATION ON EQUALITY(c1, c2);
+-- Search Optimization の削除
+ALTER TABLE t1 DROP SEARCH OPTIMIZATION ON EQUALITY(c1, c2);
+
+-- Equality で可能な全ての列に対して有効化
+-- コストが必要以上にかかり得るので個人的には非推奨
+ALTER TABLE test_table ADD SEARCH OPTIMIZATION;
+```
+
+この際の `EQUALITY` が Search Method です。以下のとおり４種類あります。
+* `EQUALITY`
+  * `=` もしくは `in` による where 句があるクエリの最適化の際に使えます
+  * ただし `not in` の場合には使えません
+  * Join の際にも効果を発揮してくれることがあります
+  * 詳細は[こちら](https://docs.snowflake.com/en/user-guide/search-optimization/point-lookup-queries)と[こちら](https://docs.snowflake.com/en/user-guide/search-optimization/join-queries)
+  * カラムの型としては numerical / string / binary / VARIANT と幅広く使えます
+* `SUBSTRING`
+  * その名の通り部分文字列に関する検索、具体的には `LIKE` や `REGEXP_LIKE` を利用した where 句があるクエリの最適化に使えます
+  * カラムの型としては string / VARIANT で使えます
+  * 詳細は[こちら](https://docs.snowflake.com/en/user-guide/search-optimization/substring-queries)
+* `FULL_TEXT`
+  * [`SEARCH` 関数](https://docs.snowflake.com/ja/user-guide/querying-with-search-functions#using-the-search-function)などによる全文検索を行うクエリの最適化に使えます
+  * 部分文字列の検索と違い、空白などで文字列をトークンに分割し、一致するトークンが含まれるかを検索します
+    * 日本語のトークナイザーはないので、英語やIPアドレスなど特定の用途でしか使え無さそうです
+  * カラムの型としては string / VARIANT で使えます
+  * 詳細は[こちら](https://docs.snowflake.com/en/user-guide/search-optimization/text-queries)
+* `GEO`
+  * GEOGRAPHY 型のカラムに対して有効化するときに使います
+  * 詳細は[こちら](https://docs.snowflake.com/en/user-guide/search-optimization/geospatial-queries)
 
 
 ## Search Optimization が有効なクエリ
@@ -69,7 +107,6 @@ Search Optimization は追加でデータ構造を管理・維持しておくこ
 * where 句でフィルターした結果、参照すべきパーティションが少ないこと
   * search optimization は partition pruning できる機会を増やすという仕組みなので、元々多数の partition を読み込まないといけないクエリの高速化はできない
 * クラスタリングキー以外での絞り込みを含むクエリ
-  * 
 
 
 ### データ型
