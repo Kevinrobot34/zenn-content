@@ -11,7 +11,7 @@ publication_name: finatext
 
 こんにちは！ナウキャストのデータエンジニアのけびんです。
 
-Snowflake は様々な便利な機能がありますが、その一つに Search Optimization があります。 Search Optimization は大規模なテーブルに対する選択的な検索などのクエリのパフォーマンスを向上させるための仕組みです。
+Snowflake は様々な便利な機能がありますが、その一つに **"Search Optimization" （検索最適化サービス）**があります。 Search Optimization は大規模なテーブルに対する選択的な検索などのクエリのパフォーマンスを向上させるための仕組みです。
 
 https://docs.snowflake.com/ja/user-guide/search-optimization-service
 
@@ -22,13 +22,13 @@ https://docs.snowflake.com/ja/user-guide/search-optimization-service
 
 ## 仕組み
 
-クエリのパフォーマンスを向上させるためには余計なマイクロパーティションを読み込まないことが重要ですが、 Search Optimization では "Search Access Path" と呼ばれる追加のデータ構造を維持・管理し、それを利用することで、選択的な検索等のクエリの際に pruning を支援します。
+クエリのパフォーマンスを向上させるためには**余計なマイクロパーティションを読み込まない**ことが重要です。例えば Clustering ではデータをソートして似たデータが近いパーティションに含まれるようにすることで partition pruning の効率を向上します。今回注目している Search Optimization が有効化されると "Search Access Path" と呼ばれるデータ構造が追加で維持・管理されるようになります。選択的な検索等の特定のクエリでこの Search Access Path を利用することで partition pruning を可能にし、パフォーマンスの向上に役立てます。
 
-![snowflake-arch](/images/articles/snowflake-search-optimization/how-it-works.png =500x)
+![snowflake-arch](/images/articles/snowflake-search-optimization/how-it-works.png)
 *https://quickstarts.snowflake.com/guide/getting_started_with_search_optimization/index.html#0 より*
 
 
-イメージとしては、 Python の Dict のような構造をで特定の列の値と Partition の対応関係を保持できるようにし、これを利用することで特定の検索クエリに対し参照すべき partition を高速に判定できるようにする、というようなものです。
+Search Access Path のイメージとしては Python の Dict のような構造で、特定の列の値と Partition の対応関係を保持しているのだと思います。このようなデータを利用することで特定の検索クエリに対し参照すべき partition を高速に判定できるようになるわけです。
 ```python
 {
     "Martin": "Partition A",
@@ -42,8 +42,6 @@ https://docs.snowflake.com/ja/user-guide/search-optimization-service
 これはあくまでイメージです。実際の実装はもっと複雑でしょうし、後述する Search Method によっても保持するべきデータ構造は変わると思われます。「Dictみたな構造で列の値と Partition の対応関係を保持しておけば `O(1)` とかで参照すべき partition がわかるので partition pruning に使える」ということがキモです。
 :::
 
-
-このように追加のデータ構造を維持することになるため、その分のストレージコストとコンピュートのコストがかかります。このコストと、Search Optimization 導入によるパフォーマンスの向上を
 
 
 ## 用語
