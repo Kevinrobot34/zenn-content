@@ -133,20 +133,124 @@ Search Optimization は普通のテーブルに対して有効化可能です。
 
 
 
-## 具体例
+## 具体例での検証
+
+### データの用意
+
+法人マスターをイメージしたテーブルを以下のように作成します。
+
+```sql
+-- サンプルテーブル作成
+CREATE OR REPLACE TABLE sample_data (
+    id INT,
+    corp_number STRING,
+    company_name STRING,
+    address STRING
+);
+
+-- サンプルデータの挿入（ランダムな13桁の法人番号）
+INSERT INTO sample_data (id, corp_number, company_name, address)
+SELECT
+    ROW_NUMBER() OVER (ORDER BY seq4()),  
+    LPAD(TO_CHAR(ABS(CAST(RANDOM() * 9999999999999 AS INT))), 13, '0'),  
+    'Company_' || LPAD(TO_CHAR(ABS(CAST(RANDOM() * 9999999999999 AS INT))), 13, '0'),
+    'Address_' || ROW_NUMBER() OVER (ORDER BY seq4())
+FROM TABLE(GENERATOR(ROWCOUNT => 100000000));
+```
+
+実際のデータは以下のようなイメージです。
+![sample-data](/images/articles/snowflake-search-optimization/sample-data.png)
+
+
+### Search Optimization のコスト予測と有効化
+
+システム関数の [SYSTEM$ESTIMATE_SEARCH_OPTIMIZATION_COSTS]( https://docs.snowflake.com/ja/sql-reference/functions/system_estimate_search_optimization_costs ) を利用することで、以下のように Search Optimization に関するコストの見積もりを行うことが可能です。
+
+
+```sql
+SELECT SYSTEM$ESTIMATE_SEARCH_OPTIMIZATION_COSTS('sample_data');
+```
+
+```json
+{
+  "tableName" : "SAMPLE_DATA",
+  "searchOptimizationEnabled" : false,
+  "costPositions" : [ {
+    "name" : "BuildCosts",
+    "costs" : {
+      "value" : 0.029424,
+      "unit" : "Credits"
+    },
+    "computationMethod" : "Estimated",
+    "comment" : "estimated via sampling"
+  }, {
+    "name" : "StorageCosts",
+    "costs" : {
+      "value" : 0.002253,
+      "unit" : "TB",
+      "perTimeUnit" : "MONTH"
+    },
+    "computationMethod" : "Estimated",
+    "comment" : "estimated via sampling"
+  }, {
+    "name" : "MaintenanceCosts",
+    "computationMethod" : "NotAvailable",
+    "comment" : "Insufficient data to compute estimate for maintenance cost. Table is too young. Requires 7 day(s) of history."
+  } ]
+}
+```
+
+ストレージコストとビルドにかかるコストがそれぞれ推定されています。テーブルによっては `MaintenanceCosts` で継続的にどれくらいの更新コストがかかるのかも見せてくれます。
+
 
 ### ポイントルックアップ
 
+まずは `corp_number` 列に対するポイントルックアップを検証しましょう。
+
+```sql
+ALTER TABLE sample_data ADD SEARCH OPTIMIZATION ON EQUALITY(corp_number);
+SHOW TABLES LIKE '%sample_data%';
+-- search_optimization_progress の列が 100 になっていれば設定完了！
+```
+
+Search Optimization の設定が完了してから `corp_number` 列に対するポイントルックアップをしてみると、以下の通り **"Search Optimization Access"** となり、 partition pruning されていることが分かります。
+
+```sql
+select * from sample_data where corp_number = '4698799331488';
+```
+
+![profile1](/images/articles/snowflake-search-optimization/profile1.png)
+
+この際、何も設定していない `company_name` 列に対して同様なクエリを実行したり、 `corp_number` 列に対して部分文字列の検索を行ったりすると、フルスキャンになります。
+```sql
+select * from sample_data where corp_number like '%4698799331%';        -- EQUALITY(corp_number) なので部分文字列検索は非対応
+select * from sample_data where company_name = 'Company_1820121784998'; -- EQUALITY(corp_number) なので company_name の検索には使えない
+```
+![profile2](/images/articles/snowflake-search-optimization/profile2.png)
+**どちらのクエリでもこのように80/80のすべてのパーティションをスキャンするような結果となる**
 
 
 ### 部分文字列・正規表現での検索
 
+次に `company_name` 列での部分文字列検索ができるように設定してみましょう。
+
+```sql
+ALTER TABLE sample_data ADD SEARCH OPTIMIZATION ON SUBSTRING(company_name);
+```
+
+`company_name` 列に対して Like で部分文字列を含むかどうか検索すると、以下のように Search Optimization で pruning されます。
+
+```sql
+select * from sample_data where company_name like '%182012178%';
+```
+
+![profile3](/images/articles/snowflake-search-optimization/profile3.png)
 
 
-### Join の最適化
+条件のところを変えてみるとよく分かりますが、 pruning できる量は条件によって変わります。場合によっては以下のように Search Optimization を使わずテーブルフルスキャンとなることもあります。
 
-
-
+![profile4](/images/articles/snowflake-search-optimization/profile4.png)
+**"Search optimization service was not used because the cost was higher than a table scan for this query." と、SOSが使われていないクエリのプロファイルの例**
 
 
 ## 必要な権限
