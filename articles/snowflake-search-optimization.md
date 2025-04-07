@@ -328,6 +328,7 @@ https://docs.snowflake.com/ja/user-guide/search-optimization-service#other-optio
 
 ## Search Optimization と Clustering
 
+Search Optimization と Clustering は併用することが可能です。しかしコストもかかるので、以下のようなそれぞれの特性を活かした併用の仕方を模索するとコスパ良く検索クエリを捌けるようにできるはずです。
 
 * Equality による pruning は Clustering によっても実現可能
   * そのため Clustering によるキーに対する Search Optimization は意味がない
@@ -344,7 +345,15 @@ https://docs.snowflake.com/ja/user-guide/search-optimization-service#other-optio
 
 ### 法人番号と法人名
 
-* 法人番号についてはクラスタリングを行い、法人名の部分文字列検索を Search Optimization でサポートする
+ナウキャストでは法人番号をキーとしたマスターデータの整備を行なっています。具体例で作成したサンプルデータはこれをイメージしていました。
+法人に関する検索は、
+* 法人番号は一致の検索
+* 法人名は部分文字列の検索
+
+が多いと考えられるので、法人番号についてはクラスタリングの設定を行い、法人名については部分文字列での Search Optimization を有効化しておくことでコスパ良く幅広い検索条件に対応できるのではないかなと考えています。
 
 
+## 終わりに
 
+RDB における index のような機能である Search Optimization について解説してきました。
+ぜひ使いこなして Snowflake のテーブルへの検索クエリのパフォーマンスを上げていきましょう！！
