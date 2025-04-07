@@ -227,7 +227,7 @@ select * from sample_data where corp_number like '%4698799331%';        -- EQUAL
 select * from sample_data where company_name = 'Company_1820121784998'; -- EQUALITY(corp_number) なので company_name の検索には使えない
 ```
 ![profile2](/images/articles/snowflake-search-optimization/profile2.png =500x)
-**どちらのクエリでもこのように80/80のすべてのパーティションをスキャンするような結果となる**
+*どちらのクエリでもこのように80/80のすべてのパーティションをスキャンするような結果となる*
 
 
 ### 部分文字列・正規表現での検索
@@ -250,7 +250,7 @@ select * from sample_data where company_name like '%182012178%';
 条件のところを変えてみるとよく分かりますが、 pruning できる量は条件によって変わります。場合によっては以下のように Search Optimization を使わずテーブルフルスキャンとなることもあります。
 
 ![profile4](/images/articles/snowflake-search-optimization/profile4.png =500x)
-**"Search optimization service was not used because the cost was higher than a table scan for this query." と、SOSが使われていないクエリのプロファイルの例**
+*"Search optimization service was not used because the cost was higher than a table scan for this query." と、SOSが使われていないクエリのプロファイルの例*
 
 
 ## 必要な権限
