@@ -219,14 +219,14 @@ Search Optimization の設定が完了してから `corp_number` 列に対する
 select * from sample_data where corp_number = '4698799331488';
 ```
 
-![profile1](/images/articles/snowflake-search-optimization/profile1.png)
+![profile1](/images/articles/snowflake-search-optimization/profile1.png =500x)
 
 この際、何も設定していない `company_name` 列に対して同様なクエリを実行したり、 `corp_number` 列に対して部分文字列の検索を行ったりすると、フルスキャンになります。
 ```sql
 select * from sample_data where corp_number like '%4698799331%';        -- EQUALITY(corp_number) なので部分文字列検索は非対応
 select * from sample_data where company_name = 'Company_1820121784998'; -- EQUALITY(corp_number) なので company_name の検索には使えない
 ```
-![profile2](/images/articles/snowflake-search-optimization/profile2.png)
+![profile2](/images/articles/snowflake-search-optimization/profile2.png =500x)
 **どちらのクエリでもこのように80/80のすべてのパーティションをスキャンするような結果となる**
 
 
@@ -244,12 +244,12 @@ ALTER TABLE sample_data ADD SEARCH OPTIMIZATION ON SUBSTRING(company_name);
 select * from sample_data where company_name like '%182012178%';
 ```
 
-![profile3](/images/articles/snowflake-search-optimization/profile3.png)
+![profile3](/images/articles/snowflake-search-optimization/profile3.png =500x)
 
 
 条件のところを変えてみるとよく分かりますが、 pruning できる量は条件によって変わります。場合によっては以下のように Search Optimization を使わずテーブルフルスキャンとなることもあります。
 
-![profile4](/images/articles/snowflake-search-optimization/profile4.png)
+![profile4](/images/articles/snowflake-search-optimization/profile4.png =500x)
 **"Search optimization service was not used because the cost was higher than a table scan for this query." と、SOSが使われていないクエリのプロファイルの例**
 
 
