@@ -70,6 +70,9 @@ ALTER TABLE t1 DROP SEARCH OPTIMIZATION ON EQUALITY(c1, c2);
 -- Equality で可能な全ての列に対して有効化
 -- コストが必要以上にかかり得るので個人的には非推奨
 ALTER TABLE test_table ADD SEARCH OPTIMIZATION;
+
+-- 以下のクエリであるテーブルで現在設定されている Search optimization を一覧することができます
+DESCRIBE SEARCH OPTIMIZATION ON sample_data;
 ```
 
 この際の `EQUALITY` が Search Method です。以下のとおり４種類あります。
