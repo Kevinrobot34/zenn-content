@@ -21,7 +21,9 @@ https://docs.snowflake.com/ja/user-guide/search-optimization-service
 
 ## 仕組み
 
-クエリのパフォーマンスを向上させるためには**余計なマイクロパーティションを読み込まない**ことが重要です。例えば Clustering ではデータをソートして似たデータが近いパーティションに含まれるようにすることで partition pruning の効率を向上します。今回のテーマである Search Optimization が有効化されると **"Search Access Path"** と呼ばれるデータ構造が追加で維持・管理されるようになります。特定のクエリでこの Search Access Path を参照することで選択的な検索などの際に partition pruning を可能にし、パフォーマンスの向上に役立てます。
+クエリのパフォーマンスを向上させるためには**余計なマイクロパーティションを読み込まない**ことが重要です。例えば Clustering ではデータをソートして似たデータが近いパーティションに含まれるようにすることで partition pruning の効率を向上します。今回のテーマである Search Optimization が有効化されると **"Search Access Path"** と呼ばれるデータ構造が追加で維持・管理されるようになります。特定のクエリでこの Search Access Path を参照することで選択的な検索などの際に partition pruning を可能にし、パフォーマンスの向上に役立てます。 
+
+**"Search Access Path"** は **RDB における index** と似た働きをする、と表現するとイメージしやすい方も多いかもしれません。
 
 ![snowflake-arch](/images/articles/snowflake-search-optimization/how-it-works.png)
 *https://quickstarts.snowflake.com/guide/getting_started_with_search_optimization/index.html#0 より*
@@ -108,7 +110,7 @@ Search Optimization は追加でデータ構造を管理・維持しておくこ
   * search optimization は partition pruning できる機会を増やすという仕組みなので、元々多数の partition を読み込まないといけないクエリの高速化はできない
   * 言い換えると、ある列の各値が多くのパーティションに散らばって存在している場合、 search optimization を利用しても結局フルスキャンとあまり変わらない結果となってしまい効果が薄い
 * クラスタリングキー以外での絞り込みを含むクエリ
-  * クラスタリングキーと比較的そう感があるカラムだと相性が良い
+  * クラスタリングキーと比較的相関があるカラムだと相性が良い
 
 
 ### データ型
