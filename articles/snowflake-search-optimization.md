@@ -58,7 +58,7 @@ search_access_path = {
 
 ## Search Optimization の操作
 
-以下で記載の通り基本的には以下のように Alter Table で設定を行います。
+Search Optimization は RDB の index のようなもののため、**テーブルのカラムごとに適用します**。具体的には以下のように Alter Table で設定を行います。
 https://docs.snowflake.com/en/user-guide/search-optimization/enabling
 
 ```sql
@@ -74,6 +74,11 @@ ALTER TABLE test_table ADD SEARCH OPTIMIZATION;
 -- 以下のクエリであるテーブルで現在設定されている Search optimization を一覧することができます
 DESCRIBE SEARCH OPTIMIZATION ON sample_data;
 ```
+
+:::message
+`ALTER TABLE test_table ADD SEARCH OPTIMIZATION;` は全てのカラムに Search Optimization を設定することになるので個人的には非推奨です。 RDB でむやみに index を設定してもよくないのと同様、 Snowflake の Search Optimization も「どのような検索クエリがあるかを精査し、対応する設定を追加する」というような考え方が重要になります。
+:::
+
 
 この際の `EQUALITY` が Search Method です。以下のとおり４種類あります。
 * `EQUALITY`
