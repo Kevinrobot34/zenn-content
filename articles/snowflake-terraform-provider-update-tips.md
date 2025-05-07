@@ -4,7 +4,7 @@ emoji: "💨"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "Terraform", "DataEngineering"]
 published: false
-publication_name: finatext
+# publication_name: finatext
 ---
 
 ## はじめに
