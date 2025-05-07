@@ -47,7 +47,7 @@ https://docs.snowflake.com/ja/sql-reference/functions-conversion
 
 ### Implicit Casting / 暗黙的キャスト
 
-演算子や関数、 Stored Procedure に渡される値が想定されるデータ型と異なる場合に、強制的にキャストが行われることを暗黙的なキャストという。 **Coercion (強制) ** とも言ったりするらしい。
+演算子や関数、 Stored Procedure に渡される値が想定されるデータ型と異なる場合に、強制的にキャストが行われることを暗黙的なキャストという。 **Coercion (強制)** とも言ったりするらしい。
 
 * 関数の例
   * テーブル my_table の my_integer_column 列のデータ型は integer
