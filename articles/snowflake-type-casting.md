@@ -25,7 +25,7 @@ publication_name: finatext
 あるデータ型の値を別のデータ型に変換することをキャストと言い、詳細は以下のドキュメントにまとまっています。
 https://docs.snowflake.com/ja/sql-reference/data-type-conversion
 
-明示的キャストと暗黙的キャストとあるのでそれぞれ見ていきましょう。
+**明示的キャスト** と **暗黙的キャスト** があるのでそれぞれ見ていきましょう。
 
 ### Explicit Casting / 明示的キャスト
 
@@ -41,17 +41,19 @@ SELECT '2022-04-01'::DATE;
 SELECT TO_DATE('2022-04-01');
 ```
 
+CAST関数とキャスト演算子 `::` は、内部的には `TO_DATE` など適切な変換関数を呼ぶようになっています。キャストの細かい挙動を知りたい場合には対応する変換の変換関数のドキュメントを見てみましょう。
+
 変換関数については以下に詳細がまとまっています。
 https://docs.snowflake.com/ja/sql-reference/functions-conversion
 
 
 ### Implicit Casting / 暗黙的キャスト
 
-演算子や関数、 Stored Procedure に渡される値が想定されるデータ型と異なる場合に、強制的にキャストが行われることを暗黙的なキャストという。 **Coercion (強制)** とも言ったりするらしい。
+演算子や関数、 Stored Procedure に渡される値が想定されるデータ型と異なる場合に、強制的にキャストされるのが暗黙的キャストです。 **Coercion (強制)** とも言うようです。
 
 * 関数の例
-  * テーブル my_table の my_integer_column 列のデータ型は integer
-  * 関数 my_float_function は引数として float を受け取る
+  * テーブル `my_table` の `my_integer_column` 列のデータ型は integer
+  * 関数 `my_float_function` は引数として float を受け取る
   * この際に、暗黙的に integer から float への変換が走る
     ```sql
     SELECT my_float_function(my_integer_column) FROM my_table;
@@ -66,7 +68,7 @@ https://docs.snowflake.com/ja/sql-reference/functions-conversion
 
 ### キャストの優先順位
 
-以下の通りキャストは優先順位が高いようです。
+以下の通りキャスト演算子は優先順位が高いようです。
 
 ```sql
 -- キャスト演算子は算術演算子 * （乗算）よりも優先順位が高い
@@ -79,13 +81,61 @@ SELECT -(0.0::FLOAT::BOOLEAN); -- この意味になり、 bool にマイナス�
 SELECT (-0.0::FLOAT)::BOOLEAN; -- ではない
 ```
 
-意外と勘違いしやすいかと思うので、複雑な式の場合には明示的にカッコでくくっておくのが大事になります。
+意外と勘違いしやすいかと思うので、複雑な式の場合には明示的にカッコでくくっておいたり、変換関数で記載したりするなどの工夫が大事になります。
 
 
 ### キャストできるデータ型
 
-以下参照
+ソースとなるデータ型によって、キャスト可能なデータ型が異なります。一部抜粋して紹介しますが、詳細は以下をご覧ください。
+
 https://docs.snowflake.com/ja/sql-reference/data-type-conversion#data-types-that-can-be-cast
+
+#### 数値系
+
+| ソースデータ型 | ターゲットデータ型 | キャスト可能 | 強制可能 | 変換関数      |
+| -------------- | ------------------ | ------------ | -------- | ------------- |
+| FLOAT          |                    |              |          |               |
+|                | BOOLEAN            | ✔            | ✔        | TO\_BOOLEAN   |
+|                | NUMBER             | ✔            | ✔        | TO\_NUMBER    |
+|                | VARCHAR            | ✔            | ✔        | TO\_VARCHAR   |
+|                | VARIANT            | ✔            | ✔        | TO\_VARIANT   |
+| NUMBER         |                    |              |          |               |
+|                | BOOLEAN            | ✔            | ✔        | TO\_BOOLEAN   |
+|                | FLOAT              | ✔            | ✔        | TO\_DOUBLE    |
+|                | TIMESTAMP          | ✔            | ✔        | TO\_TIMESTAMP |
+|                | VARCHAR            | ✔            | ✔        | TO\_VARCHAR   |
+|                | VARIANT            | ✔            | ✔        | TO\_VARIANT   |
+
+#### 日付系
+
+| ソースデータ型 | ターゲットデータ型 | キャスト可能 | 強制可能 | 変換関数      |
+| -------------- | ------------------ | ------------ | -------- | ------------- |
+| DATE           |                    |              |          |               |
+|                | TIMESTAMP          | ✔            | ✔        | TO\_TIMESTAMP |
+|                | VARCHAR            | ✔            | ✔        | TO\_VARCHAR   |
+|                | VARIANT            | ✔            | ❌        | TO\_VARIANT   |
+| TIME           |                    |              |          |               |
+|                | VARCHAR            | ✔            | ✔        | TO\_VARCHAR   |
+|                | VARIANT            | ✔            | ❌        | TO\_VARIANT   |
+| TIMESTAMP      |                    |              |          |               |
+|                | DATE               | ✔            | ✔        | TO\_DATE      |
+|                | TIME               | ✔            | ✔        | TO\_TIME      |
+|                | VARCHAR            | ✔            | ✔        | TO\_VARCHAR   |
+|                | VARIANT            | ✔            | ❌        | TO\_VARIANT   |
+
+
+##### 文字列系
+
+| ソースデータ型 | ターゲットデータ型 | キャスト可能 | 強制可能 | 変換関数      |
+| -------------- | ------------------ | ------------ | -------- | ------------- |
+| VARCHAR        |                    |              |          |               |
+|                | BOOLEAN            | ✔            | ✔        | TO\_BOOLEAN   |
+|                | DATE               | ✔            | ✔        | TO\_DATE      |
+|                | FLOAT              | ✔            | ✔        | TO\_DOUBLE    |
+|                | NUMBER             | ✔            | ✔        | TO\_NUMBER    |
+|                | TIME               | ✔            | ✔        | TO\_TIME      |
+|                | TIMESTAMP          | ✔            | ✔        | TO\_TIMESTAMP |
+|                | VARIANT            | ✔            | ❌        | TO\_VARIANT   |
 
 
 ## 文字列 → 日付・時刻の暗黙的キャスト
