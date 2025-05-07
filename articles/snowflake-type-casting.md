@@ -20,13 +20,20 @@ publication_name: finatext
 * SQL においてもデータ型には気をつけよう
 
 
-## Explicit Casting / 明示的キャスト
+## キャストについて
 
-その名の通り、明示的にデータ型の変換を行う方法。３つの方法がある。
+あるデータ型の値を別のデータ型に変換することをキャストと言い、詳細は以下のドキュメントにまとまっています。
+https://docs.snowflake.com/ja/sql-reference/data-type-conversion
 
-* CAST関数 / TRY_CAST関数
+明示的キャストと暗黙的キャストとあるのでそれぞれ見ていきましょう。
+
+### Explicit Casting / 明示的キャスト
+
+その名の通り、明示的にデータ型の変換を行う方法です。大きく分けて３つの方法があります。
+
+* [CAST関数]( https://docs.snowflake.com/ja/sql-reference/functions/cast ) / [TRY_CAST関数]( https://docs.snowflake.com/ja/sql-reference/functions/try_cast )
 * キャスト演算子 `::`
-* `TO_DATE` など、データ型ごとの変換の関数
+* [`TO_DATE`]( https://docs.snowflake.com/ja/sql-reference/functions/to_date ) や [`TRY_TO_DATE`]( https://docs.snowflake.com/ja/sql-reference/functions/try_to_date ) など、データ型ごとの変換関数
 
 ```sql
 SELECT CAST('2022-04-01' AS DATE);
@@ -34,9 +41,13 @@ SELECT '2022-04-01'::DATE;
 SELECT TO_DATE('2022-04-01');
 ```
 
-## Implicit Casting / 暗黙的キャスト
+変換関数については以下に詳細がまとまっています。
+https://docs.snowflake.com/ja/sql-reference/functions-conversion
 
-演算子や関数、 Stored Procedure に渡される値が想定されるデータ型と異なる場合に、強制的にキャストが行われることを暗黙的なキャストという。Coercion (強制) とも言ったりするらしい。
+
+### Implicit Casting / 暗黙的キャスト
+
+演算子や関数、 Stored Procedure に渡される値が想定されるデータ型と異なる場合に、強制的にキャストが行われることを暗黙的なキャストという。 **Coercion (強制) ** とも言ったりするらしい。
 
 * 関数の例
   * テーブル my_table の my_integer_column 列のデータ型は integer
@@ -55,7 +66,7 @@ SELECT TO_DATE('2022-04-01');
 
 ## キャストの優先順位
 
-以下の通りキャストは優先順位が高いらしい。
+以下の通りキャストは優先順位が高いようです。
 
 ```sql
 -- キャスト演算子は算術演算子 * （乗算）よりも優先順位が高い
@@ -68,7 +79,7 @@ SELECT -(0.0::FLOAT::BOOLEAN); -- この意味になり、 bool にマイナス�
 SELECT (-0.0::FLOAT)::BOOLEAN; -- ではない
 ```
 
-意外と非自明なので、複雑な式の場合には明示的にカッコでくくっておくのが大事。
+意外と勘違いしやすいかと思うので、複雑な式の場合には明示的にカッコでくくっておくのが大事になります。
 
 
 ## キャストできるデータ型
