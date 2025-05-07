@@ -64,7 +64,7 @@ https://docs.snowflake.com/ja/sql-reference/functions-conversion
     ```
 
 
-## キャストの優先順位
+### キャストの優先順位
 
 以下の通りキャストは優先順位が高いようです。
 
@@ -82,13 +82,13 @@ SELECT (-0.0::FLOAT)::BOOLEAN; -- ではない
 意外と勘違いしやすいかと思うので、複雑な式の場合には明示的にカッコでくくっておくのが大事になります。
 
 
-## キャストできるデータ型
+### キャストできるデータ型
 
 以下参照
 https://docs.snowflake.com/ja/sql-reference/data-type-conversion#data-types-that-can-be-cast
 
 
-## 文字列 → 日付・時刻のキャストには要注意
+## 文字列 → 日付・時刻の暗黙的キャスト
 
 ここからが本題です。
 dateadd 関数に日付を表す文字列を渡したら、date型で返して欲しいところですが実際はそうならない。
