@@ -78,7 +78,7 @@ SELECT height *(width::VARCHAR)|| " square meters" FROM dimensions; -- この意
 -- キャスト演算子は単項マイナス（否定）演算子よりも優先順位が高い
 SELECT -0.0::FLOAT::BOOLEAN;
 SELECT -(0.0::FLOAT::BOOLEAN); -- この意味になり、 bool にマイナスはつけられないのでエラーになる
-SELECT (-0.0::FLOAT)::BOOLEAN; -- ではない
+SELECT (-0.0::FLOAT)::BOOLEAN; -- こうではない
 ```
 
 意外と勘違いしやすいかと思うので、複雑な式の場合には明示的にカッコでくくっておいたり、変換関数で記載したりするなどの工夫が大事になります。
@@ -138,9 +138,11 @@ https://docs.snowflake.com/ja/sql-reference/data-type-conversion#data-types-that
 |                | VARIANT            | ✔            | ❌        | TO\_VARIANT   |
 
 
-## 文字列 → 日付・時刻の暗黙的キャスト
+## 文字列 → 日付・日時の暗黙的キャスト
 
 ここからが本題です。
+先ほど確認したように、 VARCHAR 型は様々なデータ型へと変換が可能です。このように変換先の候補が多い場合に暗黙的キャストの挙動を把握しておかないと困ることがおきます。
+
 dateadd 関数に日付を表す文字列を渡したら、date型で返して欲しいところですが実際はそうならない。
 以下の通り、 TIMESTAMP_NTZ になってしまう。
 
@@ -152,6 +154,8 @@ select
     dateadd('year', -1, data_date),
 ;
 ```
+![sample-query](/images/articles/snowflake-type-casting/sample-query.png =500x)
+
 
 
 元の列のデータ型が何なのかを意識しつつ開発するのが大事。 dbt sql model を書いているとデータ型の情報は見えにくかったりする。import の CTE でキャストが必要なくてもキャストの関数を書いておくことで、モデルの見通しが良くなるかも？と思ったりした。
