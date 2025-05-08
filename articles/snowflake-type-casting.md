@@ -1,5 +1,5 @@
 ---
-title: "Snowflake のキャスト"
+title: "Snowflake のキャストと落とし穴"
 emoji: "🏯"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Snowflake", "dbt", "SQL", "DataEngineering"]
