@@ -141,10 +141,16 @@ https://docs.snowflake.com/ja/sql-reference/data-type-conversion#data-types-that
 ## 文字列 → 日付・日時の暗黙的キャスト
 
 ここからが本題です。
-先ほど確認したように、 VARCHAR 型は様々なデータ型へと変換が可能です。このように変換先の候補が多い場合に暗黙的キャストの挙動を把握しておかないと困ることがおきます。
+先ほど確認したように、 VARCHAR 型は様々なデータ型へと変換が可能です。このように変換先の候補が多い場合に、「どのデータ型に暗黙的キャストされるのか？」を把握しておかないと困ることがおきます。具体例を見てみましょう。
 
-dateadd 関数に日付を表す文字列を渡したら、date型で返して欲しいところですが実際はそうならない。
-以下の通り、 TIMESTAMP_NTZ になってしまう。
+日付や時刻のを操作する [`dateadd`]( https://docs.snowflake.com/ja/sql-reference/functions/dateadd ) 関数は基本的に DATE / TIME / TIMESTAMP のどれかを受け取って、指定された処理を行う関数です。また戻り値のデータ型は、基本的に引数の `<date_or_time_expr>` のデータ型に対応するように決定されます。
+```sql
+DATEADD( <date_or_time_part>, <value>, <date_or_time_expr> )
+```
+
+この第３引数の `date_or_time_expr` に文字列型の値を渡すと暗黙的キャストがされることになるわけですが、データ型は何に変換されるでしょうか？
+例えば `'2025-05-07'` という文字列であれば、 DATE 型に暗黙的にキャストしてから `DATEADD` を実行し、 DATE 型の返り値にして欲しい気がしますよね。
+しかし実際にはそうはならず以下の通り TIMESTMP_NTZ 型の値が返されます。
 
 ```sql
 select 
@@ -154,7 +160,7 @@ select
     dateadd('year', -1, data_date),
 ;
 ```
-![sample-query](/images/articles/snowflake-type-casting/sample-query.png =500x)
+![sample-query](/images/articles/snowflake-type-casting/sample-query.png)
 
 
 
