@@ -103,7 +103,7 @@ https://docs.snowflake.com/ja/sql-reference/data-type-conversion#data-types-that
 ## 文字列→日付・日時の暗黙的キャスト
 
 ここからが本題です。
-先ほど確認したように、 VARCHAR 型は様々なデータ型へと変換が可能です。このように変換先の候補が多い場合、 **「どのデータ型に暗黙的キャストされるのか？」** を把握しておかないと困ることがおきます。具体例を見てみましょう。
+先ほど確認したように、 VARCHAR 型は様々なデータ型へと変換が可能です。このように変換先の候補が多い場合、 **「どのデータ型に暗黙的キャストされるのか？」** を把握しておかないと困ることがあります。具体例を見てみましょう。
 
 日付や時刻を操作する [`dateadd`]( https://docs.snowflake.com/ja/sql-reference/functions/dateadd ) 関数は DATE / TIME / TIMESTAMP のどれかを受け取って、指定された処理を行う関数です。また戻り値のデータ型は、基本的に引数の `<date_or_time_expr>` のデータ型に対応するように決定されます。
 ```sql
