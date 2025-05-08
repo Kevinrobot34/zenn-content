@@ -135,23 +135,23 @@ https://docs.snowflake.com/ja/sql-reference/data-type-conversion#data-types-that
 ## 文字列→日付・日時の暗黙的キャスト
 
 ここからが本題です。
-先ほど確認したように、 VARCHAR 型は様々なデータ型へと変換が可能です。このように変換先の候補が多い場合に、「どのデータ型に暗黙的キャストされるのか？」を把握しておかないと困ることがおきます。具体例を見てみましょう。
+先ほど確認したように、 VARCHAR 型は様々なデータ型へと変換が可能です。このように変換先の候補が多い場合、「どのデータ型に暗黙的キャストされるのか？」を把握しておかないと困ることがおきます。具体例を見てみましょう。
 
-日付や時刻のを操作する [`dateadd`]( https://docs.snowflake.com/ja/sql-reference/functions/dateadd ) 関数は DATE / TIME / TIMESTAMP のどれかを受け取って、指定された処理を行う関数です。また戻り値のデータ型は、基本的に引数の `<date_or_time_expr>` のデータ型に対応するように決定されます。
+日付や時刻を操作する [`dateadd`]( https://docs.snowflake.com/ja/sql-reference/functions/dateadd ) 関数は DATE / TIME / TIMESTAMP のどれかを受け取って、指定された処理を行う関数です。また戻り値のデータ型は、基本的に引数の `<date_or_time_expr>` のデータ型に対応するように決定されます。
 ```sql
 DATEADD( <date_or_time_part>, <value>, <date_or_time_expr> )
 ```
 
 この第３引数の `date_or_time_expr` に文字列型の値を渡すと暗黙的キャストがされることになるわけですが、データ型は何に変換されるでしょうか？
 例えば `'2025-05-07'` という文字列であれば、 DATE 型に暗黙的にキャストしてから `DATEADD` を実行し、 DATE 型の戻り値にして欲しい気がしますよね。
-しかし実際にはそうはならず以下の通り TIMESTMP_NTZ 型の値が返されます。
+しかし実際にはそうはならず以下の通り TIMESTAMP_NTZ 型の値が返されます。
 
 ```sql
 select 
-    '2025-05-07' as data_date_str,
-    data_date_str::date as data_date,
-    dateadd('year', -1, data_date_str),
-    dateadd('year', -1, data_date),
+  '2025-05-07' as data_date_str,
+  data_date_str::date as data_date,
+  dateadd('year', -1, data_date_str),
+  dateadd('year', -1, data_date),
 ;
 ```
 ![sample-query](/images/articles/snowflake-type-casting/sample-query.png)
@@ -162,7 +162,7 @@ select
 
 ## データ型を意識するための対策
 
-弊社では dbt を活用してパイプライン開発をしていますが、 dbt sql mdoel のコードには意外とデータ型の情報が出てこないことが多いです。
+弊社では dbt を活用してパイプライン開発をしていますが、 dbt sql model のコードには意外とデータ型の情報が出てこないことが多いです。
 そうすると先ほどのような暗黙的キャストの落とし穴に気づきにくいと思います。対策は色々あり得るかなと思いますが、気軽にできることとして、 import の CTE でキャストが必要なくても明示的にキャストをしておくと良いかなと思ったりしています。 Python のタイプヒント的な感じです。
 
 こうすることで、 import するテーブルにどのような列がありそれぞれのデータ型も可視化されるようになるので、モデルの可読性も上がりますし、先ほどのような暗黙的キャストによる事故も防ぎやすくなるのではないかと考えています。
