@@ -11,17 +11,19 @@ publication_name: finatext
 
 こんにちは！ナウキャストのデータエンジニアのけびんです。
 
-日々 Snowflake と dbt を使ってパイプライン開発をしているのですが、その中で「日付を表す文字列を dateadd 関数に渡したら、タイムスタンプ型として戻されることに気づかず困った」という場面に直面しました。そこで今回のブログでは Snowflake のキャストについて簡単にまとめ、「文字列 → 日付・日時」の暗黙的キャストの落とし穴とその対策を紹介しようと思います。
+日々 Snowflake と dbt を使ってパイプライン開発をしているのですが、その中で「日付を表す文字列を dateadd 関数に渡したら、タイムスタンプ型として戻されることに気づかず困った」という場面に直面しました。
+
+そこで今回のブログでは Snowflake のキャストについて簡単にまとめ、「文字列 → 日付・日時」の暗黙的キャストの落とし穴とその対策を紹介しようと思います。
 
 
-## キャストについて
+## キャスト概要
 
-あるデータ型の値を別のデータ型に変換することをキャストと言い、詳細は以下のドキュメントにまとまっています。
+あるデータ型の値を別のデータ型に変換することをキャストと言います。詳細は以下のドキュメントにまとまっています。
 https://docs.snowflake.com/ja/sql-reference/data-type-conversion
 
 **明示的キャスト** と **暗黙的キャスト** があるのでそれぞれ見ていきましょう。
 
-### Explicit Casting / 明示的キャスト
+### 明示的キャスト / Explicit Casting
 
 その名の通り、明示的にデータ型の変換を行う方法です。大きく分けて３つの方法があります。
 
@@ -41,7 +43,7 @@ CAST関数とキャスト演算子 `::` は、内部的には `TO_DATE` など�
 https://docs.snowflake.com/ja/sql-reference/functions-conversion
 
 
-### Implicit Casting / 暗黙的キャスト
+### 暗黙的キャスト / Implicit Casting
 
 演算子や関数、 Stored Procedure に渡される値が想定されるデータ型と異なる場合に、強制的にキャストされるのが暗黙的キャストです。 **Coercion (強制)** とも言うようです。
 
@@ -84,41 +86,7 @@ SELECT (-0.0::FLOAT)::BOOLEAN; -- こうではない
 
 https://docs.snowflake.com/ja/sql-reference/data-type-conversion#data-types-that-can-be-cast
 
-#### 数値系
-
-| ソースデータ型 | ターゲットデータ型 | キャスト可能 | 強制可能 | 変換関数      |
-| -------------- | ------------------ | ------------ | -------- | ------------- |
-| FLOAT          |                    |              |          |               |
-|                | BOOLEAN            | ✔            | ✔        | TO\_BOOLEAN   |
-|                | NUMBER             | ✔            | ✔        | TO\_NUMBER    |
-|                | VARCHAR            | ✔            | ✔        | TO\_VARCHAR   |
-|                | VARIANT            | ✔            | ✔        | TO\_VARIANT   |
-| NUMBER         |                    |              |          |               |
-|                | BOOLEAN            | ✔            | ✔        | TO\_BOOLEAN   |
-|                | FLOAT              | ✔            | ✔        | TO\_DOUBLE    |
-|                | TIMESTAMP          | ✔            | ✔        | TO\_TIMESTAMP |
-|                | VARCHAR            | ✔            | ✔        | TO\_VARCHAR   |
-|                | VARIANT            | ✔            | ✔        | TO\_VARIANT   |
-
-#### 日付系
-
-| ソースデータ型 | ターゲットデータ型 | キャスト可能 | 強制可能 | 変換関数      |
-| -------------- | ------------------ | ------------ | -------- | ------------- |
-| DATE           |                    |              |          |               |
-|                | TIMESTAMP          | ✔            | ✔        | TO\_TIMESTAMP |
-|                | VARCHAR            | ✔            | ✔        | TO\_VARCHAR   |
-|                | VARIANT            | ✔            | ❌        | TO\_VARIANT   |
-| TIME           |                    |              |          |               |
-|                | VARCHAR            | ✔            | ✔        | TO\_VARCHAR   |
-|                | VARIANT            | ✔            | ❌        | TO\_VARIANT   |
-| TIMESTAMP      |                    |              |          |               |
-|                | DATE               | ✔            | ✔        | TO\_DATE      |
-|                | TIME               | ✔            | ✔        | TO\_TIME      |
-|                | VARCHAR            | ✔            | ✔        | TO\_VARCHAR   |
-|                | VARIANT            | ✔            | ❌        | TO\_VARIANT   |
-
-
-##### 文字列系
+例えば VARCHAR であれば以下のような幅広いデータ型にキャストすることが可能です。
 
 | ソースデータ型 | ターゲットデータ型 | キャスト可能 | 強制可能 | 変換関数      |
 | -------------- | ------------------ | ------------ | -------- | ------------- |
